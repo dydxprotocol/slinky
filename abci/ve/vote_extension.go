@@ -11,14 +11,14 @@ import (
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/skip-mev/slinky/abci/strategies/aggregator"
-	compression "github.com/skip-mev/slinky/abci/strategies/codec"
-	"github.com/skip-mev/slinky/abci/strategies/currencypair"
-	slinkyabci "github.com/skip-mev/slinky/abci/types"
-	"github.com/skip-mev/slinky/abci/ve/types"
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	servicemetrics "github.com/skip-mev/slinky/service/metrics"
-	servicetypes "github.com/skip-mev/slinky/service/servers/oracle/types"
+	"github.com/skip-mev/connect/v2/abci/strategies/aggregator"
+	compression "github.com/skip-mev/connect/v2/abci/strategies/codec"
+	"github.com/skip-mev/connect/v2/abci/strategies/currencypair"
+	connectabci "github.com/skip-mev/connect/v2/abci/types"
+	"github.com/skip-mev/connect/v2/abci/ve/types"
+	connecttypes "github.com/skip-mev/connect/v2/pkg/types"
+	servicemetrics "github.com/skip-mev/connect/v2/service/metrics"
+	servicetypes "github.com/skip-mev/connect/v2/service/servers/oracle/types"
 )
 
 // VoteExtensionHandler is a handler that extends a vote with the oracle's
@@ -29,7 +29,7 @@ type VoteExtensionHandler struct {
 	logger log.Logger
 
 	// oracleClient is the remote oracle client that is responsible for fetching prices
-	oracleClient slinkyabci.OracleClient
+	oracleClient connectabci.OracleClient
 
 	// timeout is the maximum amount of time to wait for the oracle to respond
 	// to a price request.
@@ -52,7 +52,7 @@ type VoteExtensionHandler struct {
 // NewVoteExtensionHandler returns a new VoteExtensionHandler.
 func NewVoteExtensionHandler(
 	logger log.Logger,
-	oracleClient slinkyabci.OracleClient,
+	oracleClient connectabci.OracleClient,
 	timeout time.Duration,
 	strategy currencypair.CurrencyPairStrategy,
 	codec compression.VoteExtensionCodec,
@@ -97,7 +97,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 				"duration (seconds)", latency.Seconds(),
 				"err", err,
 			)
-			slinkyabci.RecordLatencyAndStatus(h.metrics, latency, err, servicemetrics.ExtendVote)
+			connectabci.RecordLatencyAndStatus(h.metrics, latency, err, servicemetrics.ExtendVote)
 
 			// ignore all non-panic errors
 			var p ErrPanic
@@ -108,7 +108,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 
 		if req == nil {
 			h.logger.Error("extend vote handler received a nil request")
-			err = slinkyabci.NilRequestError{
+			err = connectabci.NilRequestError{
 				Handler: servicemetrics.ExtendVote,
 			}
 			return nil, err
@@ -190,7 +190,7 @@ func (h *VoteExtensionHandler) ExtendVoteHandler() sdk.ExtendVoteHandler {
 				"err", err,
 			)
 
-			err = slinkyabci.CodecError{
+			err = connectabci.CodecError{
 				Err: err,
 			}
 
@@ -222,11 +222,11 @@ func (h *VoteExtensionHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtens
 				"duration (seconds)", latency.Seconds(),
 			)
 
-			slinkyabci.RecordLatencyAndStatus(h.metrics, latency, err, servicemetrics.VerifyVoteExtension)
+			connectabci.RecordLatencyAndStatus(h.metrics, latency, err, servicemetrics.VerifyVoteExtension)
 		}()
 
 		if req == nil {
-			err = slinkyabci.NilRequestError{
+			err = connectabci.NilRequestError{
 				Handler: servicemetrics.VerifyVoteExtension,
 			}
 			h.logger.Error("VerifyVoteExtensionHandler received a nil request")
@@ -251,7 +251,7 @@ func (h *VoteExtensionHandler) VerifyVoteExtensionHandler() sdk.VerifyVoteExtens
 				"height", req.Height,
 				"err", err,
 			)
-			err = slinkyabci.CodecError{
+			err = connectabci.CodecError{
 				Err: err,
 			}
 
@@ -292,7 +292,7 @@ func (h *VoteExtensionHandler) transformOracleServicePrices(ctx sdk.Context, pri
 
 	// Iterate over the prices and transform them into the correct format.
 	for currencyPairID, priceString := range prices {
-		cp, err := slinkytypes.CurrencyPairFromString(currencyPairID)
+		cp, err := connecttypes.CurrencyPairFromString(currencyPairID)
 		if err != nil {
 			return types.OracleVoteExtension{}, err
 		}

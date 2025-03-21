@@ -1,4 +1,4 @@
-module github.com/skip-mev/slinky
+module github.com/skip-mev/connect/v2
 
 go 1.23.1
 

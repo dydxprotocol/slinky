@@ -5,8 +5,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/x/marketmap/types"
+	connecttypes "github.com/skip-mev/connect/v2/pkg/types"
+	"github.com/skip-mev/connect/v2/x/marketmap/types"
 )
 
 // GetQueryCmd returns the parent command for all x/marketmap cli query commands.
@@ -91,7 +91,7 @@ func CmdQueryMarket() *cobra.Command {
 				return err
 			}
 
-			cp := slinkytypes.NewCurrencyPair(args[0], args[1])
+			cp := connecttypes.NewCurrencyPair(args[0], args[1])
 
 			queryClient := types.NewQueryClient(clientCtx)
 			res, err := queryClient.Market(cmd.Context(), &types.MarketRequest{

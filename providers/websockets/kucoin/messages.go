@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	slinkymath "github.com/skip-mev/slinky/pkg/math"
-	"github.com/skip-mev/slinky/providers/base/websocket/handlers"
+	connectmath "github.com/skip-mev/connect/v2/pkg/math"
+	"github.com/skip-mev/connect/v2/providers/base/websocket/handlers"
 )
 
 type (
@@ -157,7 +157,7 @@ func (h *WebSocketHandler) NewSubscribeRequestMessage(
 	for i := 0; i < numBatches; i++ {
 		// Get the instruments for this batch.
 		start := i * h.ws.MaxSubscriptionsPerBatch
-		end := slinkymath.Min((i+1)*h.ws.MaxSubscriptionsPerBatch, numInstruments)
+		end := connectmath.Min((i+1)*h.ws.MaxSubscriptionsPerBatch, numInstruments)
 
 		// Create the topic for this batch.
 		topic := fmt.Sprintf("%s%s", TickerTopic, strings.Join(instruments[start:end], ","))

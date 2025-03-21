@@ -3,7 +3,6 @@ package prometheus
 import (
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"time"
 
@@ -11,7 +10,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/pkg/sync"
+	libhttp "github.com/skip-mev/connect/v2/pkg/http"
+	"github.com/skip-mev/connect/v2/pkg/sync"
 )
 
 // stable defaults.
@@ -34,7 +34,7 @@ type PrometheusServer struct { //nolint
 // address is set, and valid. Notice, this method does not start the server.
 func NewPrometheusServer(prometheusAddress string, logger *zap.Logger) (*PrometheusServer, error) {
 	// get the prometheus server address
-	if prometheusAddress == "" || !isValidAddress(prometheusAddress) {
+	if prometheusAddress == "" || !libhttp.IsValidAddress(prometheusAddress) {
 		return nil, fmt.Errorf("invalid prometheus server address: %s", prometheusAddress)
 	}
 	srv := &http.Server{
@@ -78,17 +78,4 @@ func (ps *PrometheusServer) Start() {
 
 	// close the done channel
 	close(ps.done)
-}
-
-func isValidAddress(address string) bool {
-	host, port, err := net.SplitHostPort(address)
-	if err != nil {
-		return false
-	}
-
-	if host == "" || port == "" {
-		return false
-	}
-
-	return true
 }

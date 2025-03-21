@@ -9,20 +9,20 @@ import (
 	abcitypes "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/skip-mev/slinky/abci/strategies/aggregator"
-	"github.com/skip-mev/slinky/abci/strategies/aggregator/mocks"
-	"github.com/skip-mev/slinky/abci/strategies/codec"
-	"github.com/skip-mev/slinky/abci/testutils"
-	abcimocks "github.com/skip-mev/slinky/abci/types/mocks"
+	"github.com/skip-mev/connect/v2/abci/strategies/aggregator"
+	"github.com/skip-mev/connect/v2/abci/strategies/aggregator/mocks"
+	"github.com/skip-mev/connect/v2/abci/strategies/codec"
+	"github.com/skip-mev/connect/v2/abci/testutils"
+	abcimocks "github.com/skip-mev/connect/v2/abci/types/mocks"
 
 	"cosmossdk.io/log"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	vetypes "github.com/skip-mev/slinky/abci/ve/types"
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
+	vetypes "github.com/skip-mev/connect/v2/abci/ve/types"
+	connecttypes "github.com/skip-mev/connect/v2/pkg/types"
+	oracletypes "github.com/skip-mev/connect/v2/x/oracle/types"
 )
 
 func TestPriceApplier(t *testing.T) {
@@ -117,7 +117,7 @@ func TestPriceApplier(t *testing.T) {
 		ctx := sdk.Context{}
 
 		// succeed vote aggregation
-		cp := slinkytypes.NewCurrencyPair("BTC", "USD")
+		cp := connecttypes.NewCurrencyPair("BTC", "USD")
 		va.On("AggregateOracleVotes", ctx, []aggregator.Vote{
 			{
 				OracleVoteExtension: vetypes.OracleVoteExtension{
@@ -125,12 +125,12 @@ func TestPriceApplier(t *testing.T) {
 				},
 				ConsAddress: ca,
 			},
-		}).Return(map[slinkytypes.CurrencyPair]*big.Int{
+		}).Return(map[connecttypes.CurrencyPair]*big.Int{
 			cp: big.NewInt(-100),
 		}, nil)
 
 		ok.On("GetAllCurrencyPairs", ctx).Return(
-			[]slinkytypes.CurrencyPair{cp},
+			[]connecttypes.CurrencyPair{cp},
 		)
 
 		_, err = pa.ApplyPricesFromVoteExtensions(ctx, &abcitypes.RequestFinalizeBlock{
@@ -179,7 +179,7 @@ func TestPriceApplier(t *testing.T) {
 		}).WithBlockHeight(1)
 
 		// succeed vote aggregation
-		cp := slinkytypes.NewCurrencyPair("BTC", "USD")
+		cp := connecttypes.NewCurrencyPair("BTC", "USD")
 
 		va.On("AggregateOracleVotes", ctx, []aggregator.Vote{
 			{
@@ -194,13 +194,13 @@ func TestPriceApplier(t *testing.T) {
 				},
 				ConsAddress: ca2,
 			},
-		}).Return(map[slinkytypes.CurrencyPair]*big.Int{
+		}).Return(map[connecttypes.CurrencyPair]*big.Int{
 			cp: big.NewInt(150),
 		}, nil)
 
 		// return multiple prices
 		ok.On("GetAllCurrencyPairs", ctx).Return(
-			[]slinkytypes.CurrencyPair{cp, slinkytypes.NewCurrencyPair("ETH", "USD")}, // ignore last cp
+			[]connecttypes.CurrencyPair{cp, connecttypes.NewCurrencyPair("ETH", "USD")}, // ignore last cp
 		)
 
 		ok.On("SetPriceForCurrencyPair", ctx, cp, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
@@ -215,12 +215,12 @@ func TestPriceApplier(t *testing.T) {
 			Txs: [][]byte{extCommitInfoBz},
 		})
 		require.NoError(t, err)
-		require.Equal(t, map[slinkytypes.CurrencyPair]*big.Int{
+		require.Equal(t, map[connecttypes.CurrencyPair]*big.Int{
 			cp: big.NewInt(150),
 		}, prices)
 
 		// get prices from validators
-		expPrices := map[slinkytypes.CurrencyPair]*big.Int{
+		expPrices := map[connecttypes.CurrencyPair]*big.Int{
 			cp: big.NewInt(150),
 		}
 		va.On("GetPriceForValidator", ca1).Return(

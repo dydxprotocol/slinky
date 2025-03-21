@@ -86,7 +86,6 @@ func (p *Provider[K, V]) startMultiplexWebsocket(ctx context.Context) error {
 	if maxSubsPerConn > 0 {
 		// case where we will split ID's across sub handlers
 		numSubHandlers := int(math.Ceil(float64(len(ids)) / float64(maxSubsPerConn)))
-		p.logger.Debug("setting number of web socket handlers for provider", zap.Int("sub_handlers", numSubHandlers))
 		wg.SetLimit(numSubHandlers)
 		subTasks = slices.Chunk(ids, maxSubsPerConn)
 	} else {

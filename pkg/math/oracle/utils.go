@@ -5,9 +5,9 @@ import (
 	"maps"
 	"math/big"
 
-	"github.com/skip-mev/slinky/oracle/types"
-	pkgtypes "github.com/skip-mev/slinky/pkg/types"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/skip-mev/connect/v2/oracle/types"
+	pkgtypes "github.com/skip-mev/connect/v2/pkg/types"
+	mmtypes "github.com/skip-mev/connect/v2/x/marketmap/types"
 )
 
 // GetProviderPrice returns the relevant provider price. Note that the aggregator's
@@ -53,7 +53,7 @@ func (m *IndexPriceAggregator) GetIndexPrice(
 	return price, nil
 }
 
-// SetIndexPrice sets the index price for the given currency pair.
+// SetIndexPrices sets the index price for the given currency pair.
 func (m *IndexPriceAggregator) SetIndexPrices(
 	prices types.Prices,
 ) {

@@ -9,9 +9,46 @@ type Metrics struct {
 	mock.Mock
 }
 
-// AddProviderCountForMarket provides a mock function with given fields: market, count
-func (_m *Metrics) AddProviderCountForMarket(market string, count int) {
-	_m.Called(market, count)
+type Metrics_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *Metrics) EXPECT() *Metrics_Expecter {
+	return &Metrics_Expecter{mock: &_m.Mock}
+}
+
+// AddProviderCountForMarket provides a mock function with given fields: pairID, count
+func (_m *Metrics) AddProviderCountForMarket(pairID string, count int) {
+	_m.Called(pairID, count)
+}
+
+// Metrics_AddProviderCountForMarket_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddProviderCountForMarket'
+type Metrics_AddProviderCountForMarket_Call struct {
+	*mock.Call
+}
+
+// AddProviderCountForMarket is a helper method to define mock.On call
+//   - pairID string
+//   - count int
+func (_e *Metrics_Expecter) AddProviderCountForMarket(pairID interface{}, count interface{}) *Metrics_AddProviderCountForMarket_Call {
+	return &Metrics_AddProviderCountForMarket_Call{Call: _e.mock.On("AddProviderCountForMarket", pairID, count)}
+}
+
+func (_c *Metrics_AddProviderCountForMarket_Call) Run(run func(pairID string, count int)) *Metrics_AddProviderCountForMarket_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(int))
+	})
+	return _c
+}
+
+func (_c *Metrics_AddProviderCountForMarket_Call) Return() *Metrics_AddProviderCountForMarket_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *Metrics_AddProviderCountForMarket_Call) RunAndReturn(run func(string, int)) *Metrics_AddProviderCountForMarket_Call {
+	_c.Run(run)
+	return _c
 }
 
 // AddProviderTick provides a mock function with given fields: providerName, pairID, success
@@ -24,9 +61,9 @@ func (_m *Metrics) AddTick() {
 	_m.Called()
 }
 
-// AddTickerTick provides a mock function with given fields: ticker
-func (_m *Metrics) AddTickerTick(ticker string) {
-	_m.Called(ticker)
+// Metrics_AddTick_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddTick'
+type Metrics_AddTick_Call struct {
+	*mock.Call
 }
 
 // SetSlinkyBuildInfo provides a mock function with no fields
@@ -34,14 +71,102 @@ func (_m *Metrics) SetSlinkyBuildInfo() {
 	_m.Called()
 }
 
+// Metrics_SetConnectBuildInfo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetConnectBuildInfo'
+type Metrics_SetConnectBuildInfo_Call struct {
+	*mock.Call
+}
+
+// SetConnectBuildInfo is a helper method to define mock.On call
+func (_e *Metrics_Expecter) SetConnectBuildInfo() *Metrics_SetConnectBuildInfo_Call {
+	return &Metrics_SetConnectBuildInfo_Call{Call: _e.mock.On("SetConnectBuildInfo")}
+}
+
+func (_c *Metrics_SetConnectBuildInfo_Call) Run(run func()) *Metrics_SetConnectBuildInfo_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *Metrics_SetConnectBuildInfo_Call) Return() *Metrics_SetConnectBuildInfo_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *Metrics_SetConnectBuildInfo_Call) RunAndReturn(run func()) *Metrics_SetConnectBuildInfo_Call {
+	_c.Run(run)
+	return _c
+}
+
 // UpdateAggregatePrice provides a mock function with given fields: pairID, decimals, price
 func (_m *Metrics) UpdateAggregatePrice(pairID string, decimals uint64, price float64) {
 	_m.Called(pairID, decimals, price)
 }
 
+// Metrics_UpdateAggregatePrice_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateAggregatePrice'
+type Metrics_UpdateAggregatePrice_Call struct {
+	*mock.Call
+}
+
+// UpdateAggregatePrice is a helper method to define mock.On call
+//   - pairID string
+//   - decimals uint64
+//   - price float64
+func (_e *Metrics_Expecter) UpdateAggregatePrice(pairID interface{}, decimals interface{}, price interface{}) *Metrics_UpdateAggregatePrice_Call {
+	return &Metrics_UpdateAggregatePrice_Call{Call: _e.mock.On("UpdateAggregatePrice", pairID, decimals, price)}
+}
+
+func (_c *Metrics_UpdateAggregatePrice_Call) Run(run func(pairID string, decimals uint64, price float64)) *Metrics_UpdateAggregatePrice_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(uint64), args[2].(float64))
+	})
+	return _c
+}
+
+func (_c *Metrics_UpdateAggregatePrice_Call) Return() *Metrics_UpdateAggregatePrice_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *Metrics_UpdateAggregatePrice_Call) RunAndReturn(run func(string, uint64, float64)) *Metrics_UpdateAggregatePrice_Call {
+	_c.Run(run)
+	return _c
+}
+
 // UpdatePrice provides a mock function with given fields: name, pairID, decimals, price
 func (_m *Metrics) UpdatePrice(name string, pairID string, decimals uint64, price float64) {
 	_m.Called(name, pairID, decimals, price)
+}
+
+// Metrics_UpdatePrice_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdatePrice'
+type Metrics_UpdatePrice_Call struct {
+	*mock.Call
+}
+
+// UpdatePrice is a helper method to define mock.On call
+//   - name string
+//   - pairID string
+//   - decimals uint64
+//   - price float64
+func (_e *Metrics_Expecter) UpdatePrice(name interface{}, pairID interface{}, decimals interface{}, price interface{}) *Metrics_UpdatePrice_Call {
+	return &Metrics_UpdatePrice_Call{Call: _e.mock.On("UpdatePrice", name, pairID, decimals, price)}
+}
+
+func (_c *Metrics_UpdatePrice_Call) Run(run func(name string, pairID string, decimals uint64, price float64)) *Metrics_UpdatePrice_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string), args[2].(uint64), args[3].(float64))
+	})
+	return _c
+}
+
+func (_c *Metrics_UpdatePrice_Call) Return() *Metrics_UpdatePrice_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *Metrics_UpdatePrice_Call) RunAndReturn(run func(string, string, uint64, float64)) *Metrics_UpdatePrice_Call {
+	_c.Run(run)
+	return _c
 }
 
 // NewMetrics creates a new instance of Metrics. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

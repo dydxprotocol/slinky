@@ -5,26 +5,26 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/skip-mev/slinky/oracle/constants"
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/providers/apis/bitstamp"
-	"github.com/skip-mev/slinky/providers/apis/coinmarketcap"
-	"github.com/skip-mev/slinky/providers/apis/defi/raydium"
-	"github.com/skip-mev/slinky/providers/apis/defi/uniswapv3"
-	dydxtypes "github.com/skip-mev/slinky/providers/apis/dydx/types"
-	"github.com/skip-mev/slinky/providers/apis/kraken"
-	"github.com/skip-mev/slinky/providers/volatile"
-	"github.com/skip-mev/slinky/providers/websockets/binance"
-	"github.com/skip-mev/slinky/providers/websockets/bitfinex"
-	"github.com/skip-mev/slinky/providers/websockets/bybit"
-	"github.com/skip-mev/slinky/providers/websockets/coinbase"
-	"github.com/skip-mev/slinky/providers/websockets/cryptodotcom"
-	"github.com/skip-mev/slinky/providers/websockets/gate"
-	"github.com/skip-mev/slinky/providers/websockets/huobi"
-	"github.com/skip-mev/slinky/providers/websockets/kucoin"
-	"github.com/skip-mev/slinky/providers/websockets/mexc"
-	"github.com/skip-mev/slinky/providers/websockets/okx"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/skip-mev/connect/v2/oracle/constants"
+	connecttypes "github.com/skip-mev/connect/v2/pkg/types"
+	"github.com/skip-mev/connect/v2/providers/apis/bitstamp"
+	"github.com/skip-mev/connect/v2/providers/apis/coinmarketcap"
+	"github.com/skip-mev/connect/v2/providers/apis/defi/raydium"
+	"github.com/skip-mev/connect/v2/providers/apis/defi/uniswapv3"
+	dydxtypes "github.com/skip-mev/connect/v2/providers/apis/dydx/types"
+	"github.com/skip-mev/connect/v2/providers/apis/kraken"
+	"github.com/skip-mev/connect/v2/providers/volatile"
+	"github.com/skip-mev/connect/v2/providers/websockets/binance"
+	"github.com/skip-mev/connect/v2/providers/websockets/bitfinex"
+	"github.com/skip-mev/connect/v2/providers/websockets/bybit"
+	"github.com/skip-mev/connect/v2/providers/websockets/coinbase"
+	"github.com/skip-mev/connect/v2/providers/websockets/cryptodotcom"
+	"github.com/skip-mev/connect/v2/providers/websockets/gate"
+	"github.com/skip-mev/connect/v2/providers/websockets/huobi"
+	"github.com/skip-mev/connect/v2/providers/websockets/kucoin"
+	"github.com/skip-mev/connect/v2/providers/websockets/mexc"
+	"github.com/skip-mev/connect/v2/providers/websockets/okx"
+	mmtypes "github.com/skip-mev/connect/v2/x/marketmap/types"
 )
 
 // ProviderMapping is referencing the different providers that are supported by the dYdX market params.
@@ -51,7 +51,7 @@ var ProviderMapping = map[string]string{
 	coinmarketcap.Name:     coinmarketcap.Name,
 }
 
-// ConvertMarketParamsToMarketMap converts a dYdX market params response to a slinky market map response.
+// ConvertMarketParamsToMarketMap converts a dYdX market params response to a connect market map response.
 func ConvertMarketParamsToMarketMap(
 	params dydxtypes.QueryAllMarketParamsResponse,
 ) (mmtypes.MarketMapResponse, error) {
@@ -105,13 +105,13 @@ func CreateTickerFromMarket(market dydxtypes.MarketParam) (mmtypes.Ticker, error
 }
 
 // CreateCurrencyPairFromPair creates a currency pair from a dYdX market.
-func CreateCurrencyPairFromPair(pair string) (slinkytypes.CurrencyPair, error) {
+func CreateCurrencyPairFromPair(pair string) (connecttypes.CurrencyPair, error) {
 	split := strings.Split(pair, Delimiter)
 	if len(split) != 2 {
-		return slinkytypes.CurrencyPair{}, fmt.Errorf("expected pair (%s) to have 2 elements, got %d", pair, len(split))
+		return connecttypes.CurrencyPair{}, fmt.Errorf("expected pair (%s) to have 2 elements, got %d", pair, len(split))
 	}
 
-	cp := slinkytypes.NewCurrencyPair(
+	cp := connecttypes.NewCurrencyPair(
 		strings.ToUpper(split[0]), // Base
 		strings.ToUpper(split[1]), // Quote
 	)
@@ -137,14 +137,14 @@ func ConvertExchangeConfigJSON(
 		}
 		seen[cfg] = struct{}{}
 
-		// This means we have seen an exchange that slinky cannot support.
+		// This means we have seen an exchange that connect cannot support.
 		exchange, ok := ProviderMapping[cfg.ExchangeName]
 		if !ok {
 			continue
 		}
 
 		// Determine if the exchange needs to have an normalizeByPair.
-		var normalizeByPair *slinkytypes.CurrencyPair
+		var normalizeByPair *connecttypes.CurrencyPair
 		if len(cfg.AdjustByMarket) > 0 {
 			temp, err := CreateCurrencyPairFromPair(cfg.AdjustByMarket)
 			if err != nil {
@@ -211,7 +211,7 @@ func ConvertDenomByProvider(denom string, exchange string) (string, error) {
 			return "", fmt.Errorf("expected denom to have at least 2 fields, got %d for %s ticker: %s", len(fields), exchange, denom)
 		}
 
-		return slinkytypes.NewCurrencyPair(fields[0], fields[1]).String(), nil
+		return connecttypes.NewCurrencyPair(fields[0], fields[1]).String(), nil
 	default:
 		return denom, nil
 	}

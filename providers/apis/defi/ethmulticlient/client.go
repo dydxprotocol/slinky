@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/providers/base/api/metrics"
-
 	"github.com/ethereum/go-ethereum/rpc"
+
+	"github.com/skip-mev/connect/v2/oracle/config"
+	"github.com/skip-mev/connect/v2/providers/base/api/metrics"
 )
 
 // EVMClient is an interface that abstracts the evm client.

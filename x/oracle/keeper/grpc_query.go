@@ -6,8 +6,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/x/oracle/types"
+	connecttypes "github.com/skip-mev/connect/v2/pkg/types"
+	"github.com/skip-mev/connect/v2/x/oracle/types"
 )
 
 // queryServer is the default implementation of the x/oracle QueryService.
@@ -37,19 +37,20 @@ func (q queryServer) GetAllCurrencyPairs(ctx context.Context, _ *types.GetAllCur
 // GetPrice gets the QuotePrice and the nonce for the QuotePrice for a given CurrencyPair. The request contains a
 // CurrencyPairSelector (either the stringified CurrencyPair, or the CurrencyPair itself). If the request is nil this method fails.
 // If the selector is an incorrectly formatted string this method fails. If the QuotePrice / Nonce do not exist for this CurrencyPair, this method fails.
-func (q queryServer) GetPrice(goCtx context.Context, req *types.GetPriceRequest) (_ *types.GetPriceResponse, err error) {
+func (q queryServer) GetPrice(ctx context.Context, req *types.GetPriceRequest) (_ *types.GetPriceResponse, err error) {
 	// fail on nil requests
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
 
-	cp := req.CurrencyPair
-	if err := cp.ValidateBasic(); err != nil {
+	cp, err := connecttypes.CurrencyPairFromString(req.CurrencyPair)
+	if err != nil {
 		return nil, fmt.Errorf("invalid currency pair: %w", err)
 	}
 
-	// unwrap ctx
-	ctx := sdk.UnwrapSDKContext(goCtx)
+	if err = cp.ValidateBasic(); err != nil {
+		return nil, fmt.Errorf("invalid currency pair: %w", err)
+	}
 
 	// get the QuotePrice + nonce for the given CurrencyPair
 	qpn, err := q.k.GetPriceWithNonceForCurrencyPair(ctx, cp)
@@ -77,8 +78,8 @@ func (q queryServer) GetPrice(goCtx context.Context, req *types.GetPriceRequest)
 }
 
 // GetPrices gets the array of the QuotePrice and the nonce for the QuotePrice for a given CurrencyPairs.
-func (q queryServer) GetPrices(goCtx context.Context, req *types.GetPricesRequest) (_ *types.GetPricesResponse, err error) {
-	var cp slinkytypes.CurrencyPair
+func (q queryServer) GetPrices(ctx context.Context, req *types.GetPricesRequest) (_ *types.GetPricesResponse, err error) {
+	var cp connecttypes.CurrencyPair
 
 	// fail on nil requests
 	if req == nil {
@@ -87,13 +88,10 @@ func (q queryServer) GetPrices(goCtx context.Context, req *types.GetPricesReques
 
 	prices := make([]types.GetPriceResponse, 0, len(req.CurrencyPairIds))
 	for _, cid := range req.CurrencyPairIds {
-		cp, err = slinkytypes.CurrencyPairFromString(cid)
+		cp, err = connecttypes.CurrencyPairFromString(cid)
 		if err != nil {
 			return nil, fmt.Errorf("error unmarshalling CurrencyPairID: %w", err)
 		}
-
-		// unwrap ctx
-		ctx := sdk.UnwrapSDKContext(goCtx)
 
 		// get the QuotePrice + nonce for the given CurrencyPair
 		qpn, err := q.k.GetPriceWithNonceForCurrencyPair(ctx, cp)
@@ -128,8 +126,7 @@ func (q queryServer) GetPrices(goCtx context.Context, req *types.GetPricesReques
 //
 // NOTE: the map type returned by this query is NOT SAFE. Use GetCurrencyPairMappingList instead for a safe value.
 func (q queryServer) GetCurrencyPairMapping(ctx context.Context, _ *types.GetCurrencyPairMappingRequest) (*types.GetCurrencyPairMappingResponse, error) {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	pairs, err := q.k.GetCurrencyPairMapping(sdkCtx)
+	pairs, err := q.k.GetCurrencyPairMapping(ctx)
 	if err != nil {
 		return nil, err
 	}

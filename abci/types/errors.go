@@ -3,7 +3,7 @@ package types
 import (
 	"fmt"
 
-	servicemetrics "github.com/skip-mev/slinky/service/metrics"
+	servicemetrics "github.com/skip-mev/connect/v2/service/metrics"
 )
 
 // NilRequestError is an error that is returned when a nil request is given to the handler.
@@ -19,7 +19,7 @@ func (e NilRequestError) Label() string {
 	return "NilRequestError"
 }
 
-// WrappedHandlerError is an error that is returned when a handler that is wrapped by a Slinky ABCI handler
+// WrappedHandlerError is an error that is returned when a handler that is wrapped by a Connect ABCI handler
 // returns an error.
 type WrappedHandlerError struct {
 	Handler servicemetrics.ABCIMethod

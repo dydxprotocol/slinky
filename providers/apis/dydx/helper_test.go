@@ -1,16 +1,16 @@
 package dydx_test
 
 import (
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/providers/apis/kraken"
-	"github.com/skip-mev/slinky/providers/websockets/binance"
-	"github.com/skip-mev/slinky/providers/websockets/bybit"
-	coinbasews "github.com/skip-mev/slinky/providers/websockets/coinbase"
-	"github.com/skip-mev/slinky/providers/websockets/huobi"
-	"github.com/skip-mev/slinky/providers/websockets/kucoin"
-	"github.com/skip-mev/slinky/providers/websockets/mexc"
-	"github.com/skip-mev/slinky/providers/websockets/okx"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	connecttypes "github.com/skip-mev/connect/v2/pkg/types"
+	"github.com/skip-mev/connect/v2/providers/apis/kraken"
+	"github.com/skip-mev/connect/v2/providers/websockets/binance"
+	"github.com/skip-mev/connect/v2/providers/websockets/bybit"
+	coinbasews "github.com/skip-mev/connect/v2/providers/websockets/coinbase"
+	"github.com/skip-mev/connect/v2/providers/websockets/huobi"
+	"github.com/skip-mev/connect/v2/providers/websockets/kucoin"
+	"github.com/skip-mev/connect/v2/providers/websockets/mexc"
+	"github.com/skip-mev/connect/v2/providers/websockets/okx"
+	mmtypes "github.com/skip-mev/connect/v2/x/marketmap/types"
 )
 
 const dYdXResponseValid = `
@@ -75,7 +75,7 @@ const dYdXResponseInvalid = `
 }
 `
 
-var usdtusd = slinkytypes.NewCurrencyPair("USDT", "USD")
+var usdtusd = connecttypes.NewCurrencyPair("USDT", "USD")
 
 var convertedResponse = mmtypes.MarketMapResponse{
 	MarketMap: mmtypes.MarketMap{
@@ -186,7 +186,7 @@ var convertedResponse = mmtypes.MarketMapResponse{
 					{
 						Name:            huobi.Name,
 						OffChainTicker:  "ethusdt",
-						NormalizeByPair: &slinkytypes.CurrencyPair{Base: "ETH", Quote: "USD"},
+						NormalizeByPair: &connecttypes.CurrencyPair{Base: "ETH", Quote: "USD"},
 						Invert:          true,
 					},
 					{
@@ -196,7 +196,7 @@ var convertedResponse = mmtypes.MarketMapResponse{
 					{
 						Name:            kucoin.Name,
 						OffChainTicker:  "BTC-USDT",
-						NormalizeByPair: &slinkytypes.CurrencyPair{Base: "BTC", Quote: "USD"},
+						NormalizeByPair: &connecttypes.CurrencyPair{Base: "BTC", Quote: "USD"},
 						Invert:          true,
 					},
 					{

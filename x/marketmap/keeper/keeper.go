@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/skip-mev/connect/v2/x/marketmap/types"
 )
 
 // Keeper is the module's keeper implementation.
@@ -72,27 +72,27 @@ func (k *Keeper) SetDeleteMarketValidationHooks(hooks types.MarketValidationHook
 }
 
 // SetLastUpdated sets the lastUpdated field to the current block height.
-func (k *Keeper) SetLastUpdated(ctx sdk.Context, height uint64) error {
+func (k *Keeper) SetLastUpdated(ctx context.Context, height uint64) error {
 	return k.lastUpdated.Set(ctx, height)
 }
 
 // GetLastUpdated gets the last block-height the market map was updated.
-func (k *Keeper) GetLastUpdated(ctx sdk.Context) (uint64, error) {
+func (k *Keeper) GetLastUpdated(ctx context.Context) (uint64, error) {
 	return k.lastUpdated.Get(ctx)
 }
 
 // GetMarket returns a market from the store by its currency pair string ID.
-func (k *Keeper) GetMarket(ctx sdk.Context, tickerStr string) (types.Market, error) {
+func (k *Keeper) GetMarket(ctx context.Context, tickerStr string) (types.Market, error) {
 	return k.markets.Get(ctx, types.TickerString(tickerStr))
 }
 
 // setMarket sets a market.
-func (k *Keeper) setMarket(ctx sdk.Context, market types.Market) error {
+func (k *Keeper) setMarket(ctx context.Context, market types.Market) error {
 	return k.markets.Set(ctx, types.TickerString(market.Ticker.String()), market)
 }
 
 // EnableMarket sets the Enabled field of a Market Ticker to true.
-func (k *Keeper) EnableMarket(ctx sdk.Context, tickerStr string) error {
+func (k *Keeper) EnableMarket(ctx context.Context, tickerStr string) error {
 	market, err := k.GetMarket(ctx, tickerStr)
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ func (k *Keeper) EnableMarket(ctx sdk.Context, tickerStr string) error {
 }
 
 // DisableMarket sets the Enabled field of a Market Ticker to false.
-func (k *Keeper) DisableMarket(ctx sdk.Context, tickerStr string) error {
+func (k *Keeper) DisableMarket(ctx context.Context, tickerStr string) error {
 	market, err := k.GetMarket(ctx, tickerStr)
 	if err != nil {
 		return err
@@ -117,7 +117,7 @@ func (k *Keeper) DisableMarket(ctx sdk.Context, tickerStr string) error {
 
 // GetAllMarkets returns the set of Market objects currently stored in state
 // as a map[TickerString] -> Markets.
-func (k *Keeper) GetAllMarkets(ctx sdk.Context) (map[string]types.Market, error) {
+func (k *Keeper) GetAllMarkets(ctx context.Context) (map[string]types.Market, error) {
 	iter, err := k.markets.Iterate(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -156,7 +156,7 @@ func (k *Keeper) GetAllMarketsList(ctx sdk.Context) ([]types.Market, error) {
 
 // CreateMarket initializes a new Market.
 // The Ticker.String corresponds to a market, and must be unique.
-func (k *Keeper) CreateMarket(ctx sdk.Context, market types.Market) error {
+func (k *Keeper) CreateMarket(ctx context.Context, market types.Market) error {
 	// Check if Ticker already exists for the provider
 	alreadyExists, err := k.markets.Has(ctx, types.TickerString(market.Ticker.String()))
 	if err != nil {
@@ -170,8 +170,8 @@ func (k *Keeper) CreateMarket(ctx sdk.Context, market types.Market) error {
 }
 
 // UpdateMarket updates a Market.
-// The Ticker.String corresponds to a market, and exist unique.
-func (k *Keeper) UpdateMarket(ctx sdk.Context, market types.Market) error {
+// The Ticker.String corresponds to a market, and exists uniquely.
+func (k *Keeper) UpdateMarket(ctx context.Context, market types.Market) error {
 	// Check if Ticker already exists for the provider
 	alreadyExists, err := k.markets.Has(ctx, types.TickerString(market.Ticker.String()))
 	if err != nil {
@@ -209,17 +209,17 @@ func (k *Keeper) DeleteMarket(ctx sdk.Context, tickerStr string) (bool, error) {
 }
 
 // HasMarket checks if a market exists in the store.
-func (k *Keeper) HasMarket(ctx sdk.Context, tickerStr string) (bool, error) {
+func (k *Keeper) HasMarket(ctx context.Context, tickerStr string) (bool, error) {
 	return k.markets.Has(ctx, types.TickerString(tickerStr))
 }
 
 // SetParams sets the x/marketmap module's parameters.
-func (k *Keeper) SetParams(ctx sdk.Context, params types.Params) error {
+func (k *Keeper) SetParams(ctx context.Context, params types.Params) error {
 	return k.params.Set(ctx, params)
 }
 
 // GetParams returns the x/marketmap module's parameters.
-func (k *Keeper) GetParams(ctx sdk.Context) (types.Params, error) {
+func (k *Keeper) GetParams(ctx context.Context) (types.Params, error) {
 	return k.params.Get(ctx)
 }
 

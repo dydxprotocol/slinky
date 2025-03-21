@@ -7,24 +7,24 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/skip-mev/slinky/providers/apis/coinmarketcap"
-	dydxtypes "github.com/skip-mev/slinky/providers/apis/dydx/types"
-	"github.com/skip-mev/slinky/providers/base/testutils"
-	"github.com/skip-mev/slinky/providers/websockets/binance"
-	"github.com/skip-mev/slinky/providers/websockets/coinbase"
-	"github.com/skip-mev/slinky/providers/websockets/gate"
-	"github.com/skip-mev/slinky/providers/websockets/kucoin"
-	"github.com/skip-mev/slinky/providers/websockets/mexc"
-	"github.com/skip-mev/slinky/providers/websockets/okx"
+	"github.com/skip-mev/connect/v2/providers/apis/coinmarketcap"
+	dydxtypes "github.com/skip-mev/connect/v2/providers/apis/dydx/types"
+	"github.com/skip-mev/connect/v2/providers/base/testutils"
+	"github.com/skip-mev/connect/v2/providers/websockets/binance"
+	"github.com/skip-mev/connect/v2/providers/websockets/coinbase"
+	"github.com/skip-mev/connect/v2/providers/websockets/gate"
+	"github.com/skip-mev/connect/v2/providers/websockets/kucoin"
+	"github.com/skip-mev/connect/v2/providers/websockets/mexc"
+	"github.com/skip-mev/connect/v2/providers/websockets/okx"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/providers/apis/dydx"
-	"github.com/skip-mev/slinky/service/clients/marketmap/types"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/skip-mev/connect/v2/oracle/config"
+	connecttypes "github.com/skip-mev/connect/v2/pkg/types"
+	"github.com/skip-mev/connect/v2/providers/apis/dydx"
+	"github.com/skip-mev/connect/v2/service/clients/marketmap/types"
+	mmtypes "github.com/skip-mev/connect/v2/x/marketmap/types"
 )
 
 func TestNewResearchAPIHandler(t *testing.T) {
@@ -228,7 +228,7 @@ func TestParseResponseResearchAPI(t *testing.T) {
 
 		// check the ticker
 		expectedTicker := mmtypes.Ticker{
-			CurrencyPair:     slinkytypes.NewCurrencyPair("1INCH", "USD"),
+			CurrencyPair:     connecttypes.NewCurrencyPair("1INCH", "USD"),
 			Decimals:         10,
 			MinProviderCount: 3,
 			Enabled:          true,
@@ -343,7 +343,7 @@ func TestParseResponseResearchCMCAPI(t *testing.T) {
 
 		// check the ticker
 		expectedTicker := mmtypes.Ticker{
-			CurrencyPair:     slinkytypes.NewCurrencyPair("1INCH", "USD"),
+			CurrencyPair:     connecttypes.NewCurrencyPair("1INCH", "USD"),
 			Decimals:         10,
 			MinProviderCount: 1,
 			Enabled:          true,

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	mmtypes "github.com/skip-mev/connect/v2/x/marketmap/types"
 )
 
 var (
@@ -473,23 +473,6 @@ var (
           {
             "name": "coinmarketcap_api",
             "off_chain_ticker": "29676"
-          }
-        ]
-      },
-      "AGIX/USD": {
-        "ticker": {
-          "currency_pair": {
-            "Base": "AGIX",
-            "Quote": "USD"
-          },
-          "decimals": 10,
-          "min_provider_count": 1,
-          "enabled": true
-        },
-        "provider_configs": [
-          {
-            "name": "coinmarketcap_api",
-            "off_chain_ticker": "2424"
           }
         ]
       },
@@ -1173,10 +1156,10 @@ var (
           }
         ]
       },
-      "MATIC/USD": {
+      "POL/USD": {
         "ticker": {
           "currency_pair": {
-            "Base": "MATIC",
+            "Base": "POL",
             "Quote": "USD"
           },
           "decimals": 10,
@@ -1186,7 +1169,7 @@ var (
         "provider_configs": [
           {
             "name": "coinmarketcap_api",
-            "off_chain_ticker": "3890"
+            "off_chain_ticker": "28321"
           }
         ]
       },
@@ -1306,23 +1289,6 @@ var (
           {
             "name": "coinmarketcap_api",
             "off_chain_ticker": "28177"
-          }
-        ]
-      },
-      "RNDR/USD": {
-        "ticker": {
-          "currency_pair": {
-            "Base": "RNDR",
-            "Quote": "USD"
-          },
-          "decimals": 9,
-          "min_provider_count": 1,
-          "enabled": true
-        },
-        "provider_configs": [
-          {
-            "name": "coinmarketcap_api",
-            "off_chain_ticker": "5690"
           }
         ]
       },
@@ -3430,67 +3396,6 @@ var (
 			  {
 				"name": "okx_ws",
 				"off_chain_ticker": "AEVO-USDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  }
-			]
-		  },
-		  "AGIX/USD": {
-			"ticker": {
-			  "currency_pair": {
-				"Base": "AGIX",
-				"Quote": "USD"
-			  },
-			  "decimals": 10,
-			  "min_provider_count": 3,
-			  "enabled": true
-			},
-			"provider_configs": [
-			  {
-				"name": "binance_ws",
-				"off_chain_ticker": "AGIXUSDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  },
-			  {
-				"name": "bybit_ws",
-				"off_chain_ticker": "AGIXUSDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  },
-			  {
-				"name": "gate_ws",
-				"off_chain_ticker": "AGIX_USDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  },
-			  {
-				"name": "kucoin_ws",
-				"off_chain_ticker": "AGIX-USDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  },
-			  {
-				"name": "okx_ws",
-				"off_chain_ticker": "AGIX-USDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  },
-			  {
-				"name": "mexc_ws",
-				"off_chain_ticker": "AGIXUSDT",
 				"normalize_by_pair": {
 				  "Base": "USDT",
 				  "Quote": "USD"
@@ -5838,10 +5743,10 @@ var (
 			  }
 			]
 		  },
-		  "MATIC/USD": {
+		  "POL/USD": {
 			"ticker": {
 			  "currency_pair": {
-				"Base": "MATIC",
+				"Base": "POL",
 				"Quote": "USD"
 			  },
 			  "decimals": 10,
@@ -5851,7 +5756,7 @@ var (
 			"provider_configs": [
 			  {
 				"name": "binance_ws",
-				"off_chain_ticker": "MATICUSDT",
+				"off_chain_ticker": "POLUSDT",
 				"normalize_by_pair": {
 				  "Base": "USDT",
 				  "Quote": "USD"
@@ -5859,7 +5764,7 @@ var (
 			  },
 			  {
 				"name": "bybit_ws",
-				"off_chain_ticker": "MATICUSDT",
+				"off_chain_ticker": "POLUSDT",
 				"normalize_by_pair": {
 				  "Base": "USDT",
 				  "Quote": "USD"
@@ -5867,11 +5772,11 @@ var (
 			  },
 			  {
 				"name": "coinbase_ws",
-				"off_chain_ticker": "MATIC-USD"
+				"off_chain_ticker": "POL-USD"
 			  },
 			  {
 				"name": "gate_ws",
-				"off_chain_ticker": "MATIC_USDT",
+				"off_chain_ticker": "POL_USDT",
 				"normalize_by_pair": {
 				  "Base": "USDT",
 				  "Quote": "USD"
@@ -5879,7 +5784,7 @@ var (
 			  },
 			  {
 				"name": "huobi_ws",
-				"off_chain_ticker": "maticusdt",
+				"off_chain_ticker": "polusdt",
 				"normalize_by_pair": {
 				  "Base": "USDT",
 				  "Quote": "USD"
@@ -5887,11 +5792,11 @@ var (
 			  },
 			  {
 				"name": "kraken_api",
-				"off_chain_ticker": "MATICUSD"
+				"off_chain_ticker": "POLUSD"
 			  },
 			  {
 				"name": "kucoin_ws",
-				"off_chain_ticker": "MATIC-USDT",
+				"off_chain_ticker": "POL-USDT",
 				"normalize_by_pair": {
 				  "Base": "USDT",
 				  "Quote": "USD"
@@ -5899,7 +5804,7 @@ var (
 			  },
 			  {
 				"name": "mexc_ws",
-				"off_chain_ticker": "MATICUSDT",
+				"off_chain_ticker": "POLUSDT",
 				"normalize_by_pair": {
 				  "Base": "USDT",
 				  "Quote": "USD"
@@ -5907,7 +5812,7 @@ var (
 			  },
 			  {
 				"name": "okx_ws",
-				"off_chain_ticker": "MATIC-USDT",
+				"off_chain_ticker": "POL-USDT",
 				"normalize_by_pair": {
 				  "Base": "USDT",
 				  "Quote": "USD"
@@ -5915,7 +5820,7 @@ var (
 			  },
 			  {
 				"name": "crypto_dot_com_ws",
-				"off_chain_ticker": "MATIC_USD"
+				"off_chain_ticker": "POL_USD"
 			  }
 			]
 		  },
@@ -6347,67 +6252,6 @@ var (
 			  {
 				"name": "mexc_ws",
 				"off_chain_ticker": "PYTHUSDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  }
-			]
-		  },
-		  "RNDR/USD": {
-			"ticker": {
-			  "currency_pair": {
-				"Base": "RNDR",
-				"Quote": "USD"
-			  },
-			  "decimals": 9,
-			  "min_provider_count": 3,
-			  "enabled": true
-			},
-			"provider_configs": [
-			  {
-				"name": "binance_ws",
-				"off_chain_ticker": "RNDRUSDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  },
-			  {
-				"name": "coinbase_ws",
-				"off_chain_ticker": "RNDR-USD"
-			  },
-			  {
-				"name": "kraken_api",
-				"off_chain_ticker": "RNDRUSD"
-			  },
-			  {
-				"name": "kucoin_ws",
-				"off_chain_ticker": "RNDR-USDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  },
-			  {
-				"name": "okx_ws",
-				"off_chain_ticker": "RNDR-USDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  },
-			  {
-				"name": "mexc_ws",
-				"off_chain_ticker": "RNDRUSDT",
-				"normalize_by_pair": {
-				  "Base": "USDT",
-				  "Quote": "USD"
-				}
-			  },
-			  {
-				"name": "crypto_dot_com_ws",
-				"off_chain_ticker": "RNDR_USDT",
 				"normalize_by_pair": {
 				  "Base": "USDT",
 				  "Quote": "USD"
@@ -7982,23 +7826,6 @@ var (
 			  }
 			]
 		  },
-		  "AGIX/USD": {
-			"ticker": {
-			  "currency_pair": {
-				"Base": "AGIX",
-				"Quote": "USD"
-			  },
-			  "decimals": 10,
-			  "min_provider_count": 1,
-			  "enabled": true
-			},
-			"provider_configs": [
-			  {
-				"name": "coingecko_api",
-				"off_chain_ticker": "singularitynet/usd"
-			  }
-			]
-		  },
 		  "ALGO/USD": {
 			"ticker": {
 			  "currency_pair": {
@@ -9172,10 +8999,10 @@ var (
 			  }
 			]
 		  },
-		  "MATIC/USD": {
+		  "POL/USD": {
 			"ticker": {
 			  "currency_pair": {
-				"Base": "MATIC",
+				"Base": "POL",
 				"Quote": "USD"
 			  },
 			  "decimals": 10,
@@ -9185,7 +9012,7 @@ var (
 			"provider_configs": [
 			  {
 				"name": "coingecko_api",
-				"off_chain_ticker": "matic-network/usd"
+				"off_chain_ticker": "pol-network/usd"
 			  }
 			]
 		  },
@@ -9305,23 +9132,6 @@ var (
 			  {
 				"name": "coingecko_api",
 				"off_chain_ticker": "pyth-network/usd"
-			  }
-			]
-		  },
-		  "RNDR/USD": {
-			"ticker": {
-			  "currency_pair": {
-				"Base": "RNDR",
-				"Quote": "USD"
-			  },
-			  "decimals": 9,
-			  "min_provider_count": 1,
-			  "enabled": true
-			},
-			"provider_configs": [
-			  {
-				"name": "coingecko_api",
-				"off_chain_ticker": "render-token/usd"
 			  }
 			]
 		  },

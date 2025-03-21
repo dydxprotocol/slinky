@@ -7,11 +7,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle"
-	oraclemetrics "github.com/skip-mev/slinky/oracle/metrics"
-	"github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/pkg/math"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/skip-mev/connect/v2/oracle"
+	oraclemetrics "github.com/skip-mev/connect/v2/oracle/metrics"
+	"github.com/skip-mev/connect/v2/oracle/types"
+	"github.com/skip-mev/connect/v2/pkg/math"
+	mmtypes "github.com/skip-mev/connect/v2/x/marketmap/types"
 )
 
 var _ oracle.PriceAggregator = &IndexPriceAggregator{}
@@ -117,7 +117,6 @@ func (m *IndexPriceAggregator) AggregatePrices() {
 		m.logger.Debug(
 			"calculated median price",
 			zap.String("target_ticker", ticker),
-
 			zap.String("unscaled_price", indexPrices[target.String()].String()),
 			zap.String("scaled_price", scaledPrices[target.String()].String()),
 			zap.Any("converted_prices", convertedPrices),

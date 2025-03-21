@@ -1,9 +1,9 @@
 package keeper_test
 
 import (
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/x/marketmap/keeper"
-	"github.com/skip-mev/slinky/x/marketmap/types"
+	connecttypes "github.com/skip-mev/connect/v2/pkg/types"
+	"github.com/skip-mev/connect/v2/x/marketmap/keeper"
+	"github.com/skip-mev/connect/v2/x/marketmap/types"
 )
 
 func (s *KeeperTestSuite) TestMarketMap() {
@@ -111,7 +111,7 @@ func (s *KeeperTestSuite) TestMarket() {
 
 	s.Run("run query with no state", func() {
 		_, err := qs.Market(s.ctx, &types.MarketRequest{
-			CurrencyPair: slinkytypes.CurrencyPair{
+			CurrencyPair: connecttypes.CurrencyPair{
 				Base:  "valid",
 				Quote: "pair",
 			},

@@ -5,7 +5,8 @@ icon: person-running-fast
 ---
 
 import QuickStartSnippet from '/snippets/quickstart.mdx';
-import QuickStartDYDXSnippet from '/snippets/dydx-quickstart.mdx';
+import QuickStartDYDXSnippet from '/snippets/dydx-quickstart-guide.mdx';
+import QuickStartStargazeSnippet from '/snippets/stargaze-quickstart-guide.mdx';
 
 
 <Info>
@@ -19,12 +20,12 @@ This document will guide you through setting up and running Connect, as well as 
 ### Using Curl
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/skip-mev/slinky/main/scripts/install.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/skip-mev/connect/main/scripts/install.sh | sudo bash
 ```
 
 ### From GitHub Releases
 
-Head over to our [GitHub Releases](https://github.com/skip-mev/slinky/releases) page and download the binary that matches your machine's architecture.
+Head over to our [GitHub Releases](https://github.com/skip-mev/connect/releases) page and download the binary that matches your machine's architecture.
 
 ### From Source
 
@@ -32,8 +33,8 @@ To install from source, you'll need [Git](https://git-scm.com/) and [Go](https:/
 
 Enter the commands below to install the binary.
 ```shell
-git clone git@github.com:skip-mev/slinky.git
-cd slinky
+git clone git@github.com:skip-mev/connect.git
+cd connect
 git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
 make install
 ```
@@ -43,20 +44,33 @@ make install
 Let's check Connect is properly installed on your machine.
 You should see the version printed in your terminal after running the following command:
 ```shell
-slinky version
+connect version
 ```
 
 ## Run Connect Sidecar
 
 <Tabs>
-    <Tab title="Cosmos SDK Blockchains">
+    <Tab title="General">
+        This tab provides general instructions for starting the Connect sidecar.
+        If you are running one of the chains listed in the tabs above, please refer to those instructions.
         <QuickStartSnippet />
     </Tab>
-    <Tab title="dYdX Blockchain">
+    <Tab title="dYdX">
         <QuickStartDYDXSnippet />
     </Tab>
-    <Tab title="Neutron Blockchain">
-        **The minimum required Connect version for the Neutron chain is `v1.0.3+`.**
+    <Tab title="Neutron">
+        **The required Connect version for the Neutron chain is `v1.0.12`.**
+        <QuickStartSnippet />
+    </Tab>
+    <Tab title="Stargaze">
+        <QuickStartStargazeSnippet />
+    </Tab>
+    <Tab title="Warden">
+        **The required Connect version for the Warden chain is `v1.0.12`.**
+        <QuickStartSnippet />
+    </Tab>
+    <Tab title="Initia">
+        **The required Connect version for the Initia chain is `v1.0.12`.**
         <QuickStartSnippet />
     </Tab>
 </Tabs>
@@ -68,7 +82,7 @@ slinky version
 To verify Connect is working, run the following command:
 
 ```shell
-curl 'http://localhost:8080/slinky/oracle/v1/prices' | jq .
+curl 'http://localhost:8080/connect/oracle/v2/prices' | jq .
 ```
 
 The output of the command should look similar to this:

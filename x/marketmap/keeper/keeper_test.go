@@ -5,8 +5,8 @@ import (
 
 	"github.com/skip-mev/chaintestutil/sample"
 
-	oraclekeeper "github.com/skip-mev/slinky/x/oracle/keeper"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
+	oraclekeeper "github.com/skip-mev/connect/v2/x/oracle/keeper"
+	oracletypes "github.com/skip-mev/connect/v2/x/oracle/types"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/runtime"
@@ -15,9 +15,9 @@ import (
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/stretchr/testify/suite"
 
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/x/marketmap/keeper"
-	"github.com/skip-mev/slinky/x/marketmap/types"
+	connecttypes "github.com/skip-mev/connect/v2/pkg/types"
+	"github.com/skip-mev/connect/v2/x/marketmap/keeper"
+	"github.com/skip-mev/connect/v2/x/marketmap/types"
 )
 
 var r = sample.Rand()
@@ -95,7 +95,7 @@ func TestKeeperTestSuite(t *testing.T) {
 var (
 	btcusdt = types.Market{
 		Ticker: types.Ticker{
-			CurrencyPair: slinkytypes.CurrencyPair{
+			CurrencyPair: connecttypes.CurrencyPair{
 				Base:  "BITCOIN",
 				Quote: "USDT",
 			},
@@ -112,7 +112,7 @@ var (
 
 	usdtusd = types.Market{
 		Ticker: types.Ticker{
-			CurrencyPair: slinkytypes.CurrencyPair{
+			CurrencyPair: connecttypes.CurrencyPair{
 				Base:  "USDT",
 				Quote: "USD",
 			},
@@ -129,7 +129,7 @@ var (
 
 	usdcusd = types.Market{
 		Ticker: types.Ticker{
-			CurrencyPair: slinkytypes.CurrencyPair{
+			CurrencyPair: connecttypes.CurrencyPair{
 				Base:  "USDC",
 				Quote: "USD",
 			},
@@ -146,7 +146,7 @@ var (
 
 	ethusdt = types.Market{
 		Ticker: types.Ticker{
-			CurrencyPair: slinkytypes.CurrencyPair{
+			CurrencyPair: connecttypes.CurrencyPair{
 				Base:  "ETHEREUM",
 				Quote: "USDT",
 			},
@@ -248,7 +248,7 @@ func (s *KeeperTestSuite) TestInvalidCreate() {
 	// invalid market with a normalize pair not in state
 	invalidMarket := types.Market{
 		Ticker: types.Ticker{
-			CurrencyPair: slinkytypes.CurrencyPair{
+			CurrencyPair: connecttypes.CurrencyPair{
 				Base:  "BITCOIN",
 				Quote: "USDT",
 			},
@@ -259,7 +259,7 @@ func (s *KeeperTestSuite) TestInvalidCreate() {
 			{
 				Name:            "kucoin",
 				OffChainTicker:  "btc-usdt",
-				NormalizeByPair: &slinkytypes.CurrencyPair{Base: "invalid", Quote: "pair"},
+				NormalizeByPair: &connecttypes.CurrencyPair{Base: "invalid", Quote: "pair"},
 			},
 		},
 	}
@@ -277,7 +277,7 @@ func (s *KeeperTestSuite) TestInvalidUpdate() {
 	invalidMarket.ProviderConfigs = append(invalidMarket.ProviderConfigs, types.ProviderConfig{
 		Name:            "huobi",
 		OffChainTicker:  "btc-usdt",
-		NormalizeByPair: &slinkytypes.CurrencyPair{Base: "invalid", Quote: "pair"},
+		NormalizeByPair: &connecttypes.CurrencyPair{Base: "invalid", Quote: "pair"},
 	})
 
 	s.Require().NoError(s.keeper.UpdateMarket(s.ctx, invalidMarket))

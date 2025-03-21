@@ -14,8 +14,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	slinkygrpc "github.com/skip-mev/slinky/pkg/grpc"
-	"github.com/skip-mev/slinky/service/servers/oracle/types"
+	connectgrpc "github.com/skip-mev/connect/v2/pkg/grpc"
+	"github.com/skip-mev/connect/v2/service/servers/oracle/types"
 )
 
 var (
@@ -32,7 +32,7 @@ var (
 
 			// Set up a connection to the server.
 			url := fmt.Sprintf("%s:%s", host, port)
-			conn, err := slinkygrpc.NewClient(url, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			conn, err := connectgrpc.NewClient(url, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			if err != nil {
 				log.Fatalf("did not connect: %v", err)
 			}

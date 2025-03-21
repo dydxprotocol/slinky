@@ -22,14 +22,14 @@
 go.work*
 
 # Testing script folders
-/tests/.slinkyd
+/tests/.connectd
 
 # build dir
 /build/
 
 run.go
 
-/tests/e2e/.slinky-e2e-testnet-*
+/tests/e2e/.connect-e2e-testnet-*
 
 # ide
 .idea/*
