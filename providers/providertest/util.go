@@ -3,10 +3,10 @@ package providertest
 import (
 	"fmt"
 
-	"github.com/skip-mev/slinky/cmd/constants"
-	cmdconfig "github.com/skip-mev/slinky/cmd/slinky/config"
-	"github.com/skip-mev/slinky/oracle/config"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/cmd/constants"
+	cmdconfig "github.com/dydxprotocol/slinky/cmd/slinky/config"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 func FilterMarketMapToProviders(mm mmtypes.MarketMap) map[string]mmtypes.MarketMap {

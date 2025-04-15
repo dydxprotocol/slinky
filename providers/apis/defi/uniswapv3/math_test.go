@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/skip-mev/slinky/providers/apis/defi/uniswapv3"
+	"github.com/dydxprotocol/slinky/providers/apis/defi/uniswapv3"
 )
 
 func TestConvertSquareRootX96Price(t *testing.T) {

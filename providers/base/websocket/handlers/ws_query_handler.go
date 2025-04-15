@@ -7,10 +7,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/providers/base/websocket/errors"
-	"github.com/skip-mev/slinky/providers/base/websocket/metrics"
-	providertypes "github.com/skip-mev/slinky/providers/types"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	"github.com/dydxprotocol/slinky/providers/base/websocket/errors"
+	"github.com/dydxprotocol/slinky/providers/base/websocket/metrics"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
 )
 
 // WebSocketQueryHandler is an interface that encapsulates querying a websocket

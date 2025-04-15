@@ -5,15 +5,15 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/providers/apis/dydx"
-	"github.com/skip-mev/slinky/providers/apis/marketmap"
-	"github.com/skip-mev/slinky/providers/base"
-	apihandlers "github.com/skip-mev/slinky/providers/base/api/handlers"
-	apimetrics "github.com/skip-mev/slinky/providers/base/api/metrics"
-	providermetrics "github.com/skip-mev/slinky/providers/base/metrics"
-	"github.com/skip-mev/slinky/service/clients/marketmap/types"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	"github.com/dydxprotocol/slinky/providers/apis/dydx"
+	"github.com/dydxprotocol/slinky/providers/apis/marketmap"
+	"github.com/dydxprotocol/slinky/providers/base"
+	apihandlers "github.com/dydxprotocol/slinky/providers/base/api/handlers"
+	apimetrics "github.com/dydxprotocol/slinky/providers/base/api/metrics"
+	providermetrics "github.com/dydxprotocol/slinky/providers/base/metrics"
+	"github.com/dydxprotocol/slinky/service/clients/marketmap/types"
+	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 // MarketMapProviderFactory returns a sample implementation of the market map provider. This provider

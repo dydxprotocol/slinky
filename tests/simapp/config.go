@@ -40,8 +40,8 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/x/slashing"     // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/staking"      // import for side-effects
 
-	_ "github.com/skip-mev/slinky/x/marketmap" // import for side-effects
-	_ "github.com/skip-mev/slinky/x/oracle"    // import for side-effects
+	_ "github.com/dydxprotocol/slinky/x/marketmap" // import for side-effects
+	_ "github.com/dydxprotocol/slinky/x/oracle"    // import for side-effects
 
 	"cosmossdk.io/core/appconfig"
 	circuittypes "cosmossdk.io/x/circuit/types"
@@ -64,10 +64,10 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	marketmapmodulev1 "github.com/skip-mev/slinky/api/slinky/marketmap/module/v1"
-	oraclemodulev1 "github.com/skip-mev/slinky/api/slinky/oracle/module/v1"
-	marketmaptypes "github.com/skip-mev/slinky/x/marketmap/types"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
+	marketmapmodulev1 "github.com/dydxprotocol/slinky/api/slinky/marketmap/module/v1"
+	oraclemodulev1 "github.com/dydxprotocol/slinky/api/slinky/oracle/module/v1"
+	marketmaptypes "github.com/dydxprotocol/slinky/x/marketmap/types"
+	oracletypes "github.com/dydxprotocol/slinky/x/oracle/types"
 )
 
 var (

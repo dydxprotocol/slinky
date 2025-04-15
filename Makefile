@@ -7,7 +7,7 @@ export COMETBFT_VERSION := $(shell go list -m github.com/cometbft/cometbft | sed
 BIN_DIR ?= $(GOPATH)/bin
 BUILD_DIR ?= $(CURDIR)/build
 PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
-HTTPS_GIT := https://github.com/skip-mev/slinky.git
+HTTPS_GIT := https://github.com/dydxprotocol/slinky.git
 DOCKER := $(shell which docker)
 DOCKER_COMPOSE := $(shell which docker-compose)
 HOMEDIR ?= $(CURDIR)/tests/.slinkyd
@@ -45,7 +45,7 @@ export USE_OSMOSIS_MARKETS ?= $(USE_OSMOSIS_MARKETS)
 export USE_POLYMARKET_MARKETS ?= $(USE_POLYMARKET_MARKETS)
 export SCRIPT_DIR := $(SCRIPT_DIR)
 
-BUILD_TAGS := -X github.com/skip-mev/slinky/cmd/build.Build=$(TAG)
+BUILD_TAGS := -X github.com/dydxprotocol/slinky/cmd/build.Build=$(TAG)
 
 ###############################################################################
 ###                               build                                     ###
@@ -85,8 +85,8 @@ install: tidy
 
 docker-build:
 	@echo "Building E2E Docker image..."
-	@DOCKER_BUILDKIT=1 $(DOCKER) build -t skip-mev/slinky-e2e -f contrib/images/slinky.e2e.Dockerfile .
-	@DOCKER_BUILDKIT=1 $(DOCKER) build -t skip-mev/slinky-e2e-oracle -f contrib/images/slinky.sidecar.dev.Dockerfile .
+	@DOCKER_BUILDKIT=1 $(DOCKER) build -t dydxprotocol/slinky-e2e -f contrib/images/slinky.e2e.Dockerfile .
+	@DOCKER_BUILDKIT=1 $(DOCKER) build -t dydxprotocol/slinky-e2e-oracle -f contrib/images/slinky.sidecar.dev.Dockerfile .
 
 .PHONY: docker-build
 
@@ -294,7 +294,7 @@ gen-mocks:
 format:
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "*/mocks/*" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run mvdan.cc/gofumpt -w .
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "*/mocks/*" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run github.com/client9/misspell/cmd/misspell -w
-	@find . -name '*.go' -type f -not -path "*.git*" -not -path "/*mocks/*" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run golang.org/x/tools/cmd/goimports -w -local github.com/skip-mev/slinky
+	@find . -name '*.go' -type f -not -path "*.git*" -not -path "/*mocks/*" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run golang.org/x/tools/cmd/goimports -w -local github.com/dydxprotocol/slinky
 
 .PHONY: format
 

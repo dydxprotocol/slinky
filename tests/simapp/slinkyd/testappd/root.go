@@ -18,7 +18,7 @@ import (
 	"cosmossdk.io/log"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
 
-	"github.com/skip-mev/slinky/tests/simapp"
+	"github.com/dydxprotocol/slinky/tests/simapp"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
@@ -43,7 +43,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 
-	oracleconfig "github.com/skip-mev/slinky/oracle/config"
+	oracleconfig "github.com/dydxprotocol/slinky/oracle/config"
 )
 
 // NewRootCmd creates a new root command for simd. It is called once in the main function.

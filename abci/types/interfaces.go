@@ -6,9 +6,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc"
 
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	servertypes "github.com/skip-mev/slinky/service/servers/oracle/types"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
+	servertypes "github.com/dydxprotocol/slinky/service/servers/oracle/types"
+	oracletypes "github.com/dydxprotocol/slinky/x/oracle/types"
 )
 
 // OracleKeeper defines the interface that must be fulfilled by the oracle keeper. This

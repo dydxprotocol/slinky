@@ -7,13 +7,13 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle"
-	oraclemetrics "github.com/skip-mev/slinky/oracle/metrics"
-	oracletypes "github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/pkg/log"
-	oraclemath "github.com/skip-mev/slinky/pkg/math/oracle"
-	oraclefactory "github.com/skip-mev/slinky/providers/factories/oracle"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle"
+	oraclemetrics "github.com/dydxprotocol/slinky/oracle/metrics"
+	oracletypes "github.com/dydxprotocol/slinky/oracle/types"
+	"github.com/dydxprotocol/slinky/pkg/log"
+	oraclemath "github.com/dydxprotocol/slinky/pkg/math/oracle"
+	oraclefactory "github.com/dydxprotocol/slinky/providers/factories/oracle"
+	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 type TestingOracle struct {

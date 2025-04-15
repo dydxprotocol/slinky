@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/skip-mev/slinky/x/marketmap/types/tickermetadata"
+	"github.com/dydxprotocol/slinky/x/marketmap/types/tickermetadata"
 )
 
 func Test_UnmarshalDyDx(t *testing.T) {

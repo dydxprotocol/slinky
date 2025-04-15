@@ -11,14 +11,14 @@ import (
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/skip-mev/slinky/abci/strategies/aggregator"
-	compression "github.com/skip-mev/slinky/abci/strategies/codec"
-	"github.com/skip-mev/slinky/abci/strategies/currencypair"
-	slinkyabci "github.com/skip-mev/slinky/abci/types"
-	"github.com/skip-mev/slinky/abci/ve/types"
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	servicemetrics "github.com/skip-mev/slinky/service/metrics"
-	servicetypes "github.com/skip-mev/slinky/service/servers/oracle/types"
+	"github.com/dydxprotocol/slinky/abci/strategies/aggregator"
+	compression "github.com/dydxprotocol/slinky/abci/strategies/codec"
+	"github.com/dydxprotocol/slinky/abci/strategies/currencypair"
+	slinkyabci "github.com/dydxprotocol/slinky/abci/types"
+	"github.com/dydxprotocol/slinky/abci/ve/types"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
+	servicemetrics "github.com/dydxprotocol/slinky/service/metrics"
+	servicetypes "github.com/dydxprotocol/slinky/service/servers/oracle/types"
 )
 
 // VoteExtensionHandler is a handler that extends a vote with the oracle's

@@ -9,14 +9,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	slinkygrpc "github.com/skip-mev/slinky/pkg/grpc"
-	"github.com/skip-mev/slinky/providers/apis/marketmap"
-	apihandlers "github.com/skip-mev/slinky/providers/base/api/handlers"
-	"github.com/skip-mev/slinky/providers/base/api/metrics"
-	mmclient "github.com/skip-mev/slinky/service/clients/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	slinkygrpc "github.com/dydxprotocol/slinky/pkg/grpc"
+	"github.com/dydxprotocol/slinky/providers/apis/marketmap"
+	apihandlers "github.com/dydxprotocol/slinky/providers/base/api/handlers"
+	"github.com/dydxprotocol/slinky/providers/base/api/metrics"
+	mmclient "github.com/dydxprotocol/slinky/service/clients/marketmap/types"
 
-	providertypes "github.com/skip-mev/slinky/providers/types"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
 )
 
 var _ mmclient.MarketMapFetcher = &SwitchOverFetcher{}

@@ -1,5 +1,5 @@
 version: v1
-name: buf.build/skip-mev/slinky
+name: buf.build/dydxprotocol/slinky
 
 deps:
   - buf.build/cosmos/cosmos-proto

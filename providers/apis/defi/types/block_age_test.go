@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/skip-mev/slinky/providers/apis/defi/types"
+	"github.com/dydxprotocol/slinky/providers/apis/defi/types"
 )
 
 func TestBlockAgeChecker_IsHeightValid(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/skip-mev/slinky/providers/volatile"
+	"github.com/dydxprotocol/slinky/providers/volatile"
 )
 
 const dailySeconds = 24 * 60 * 60

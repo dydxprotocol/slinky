@@ -3,7 +3,7 @@ package cryptodotcom
 import (
 	"time"
 
-	"github.com/skip-mev/slinky/oracle/config"
+	"github.com/dydxprotocol/slinky/oracle/config"
 )
 
 const (

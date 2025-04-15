@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/x/marketmap/types"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
+	"github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 func TestDefaultDeleteMarketValidationHooks_ValidateMarket(t *testing.T) {

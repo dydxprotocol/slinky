@@ -5,9 +5,9 @@ package mocks
 import (
 	mock "github.com/stretchr/testify/mock"
 
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
+	oracletypes "github.com/dydxprotocol/slinky/x/oracle/types"
 
-	pkgtypes "github.com/skip-mev/slinky/pkg/types"
+	pkgtypes "github.com/dydxprotocol/slinky/pkg/types"
 
 	types "github.com/cosmos/cosmos-sdk/types"
 )

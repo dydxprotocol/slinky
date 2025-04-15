@@ -1,4 +1,4 @@
-module github.com/skip-mev/slinky
+module github.com/dydxprotocol/slinky
 
 go 1.23.1
 

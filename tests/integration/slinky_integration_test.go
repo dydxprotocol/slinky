@@ -13,14 +13,14 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/skip-mev/slinky/tests/integration"
-	marketmapmodule "github.com/skip-mev/slinky/x/marketmap"
-	"github.com/skip-mev/slinky/x/oracle"
+	"github.com/dydxprotocol/slinky/tests/integration"
+	marketmapmodule "github.com/dydxprotocol/slinky/x/marketmap"
+	"github.com/dydxprotocol/slinky/x/oracle"
 )
 
 var (
 	image = ibc.DockerImage{
-		Repository: "skip-mev/slinky-e2e",
+		Repository: "dydxprotocol/slinky-e2e",
 		Version:    "latest",
 		UIDGID:     "1000:1000",
 	}
@@ -31,7 +31,7 @@ var (
 	gasAdjustment = 1.5
 
 	oracleImage = ibc.DockerImage{
-		Repository: "skip-mev/slinky-e2e-oracle",
+		Repository: "dydxprotocol/slinky-e2e-oracle",
 		Version:    "latest",
 		UIDGID:     "1000:1000",
 	}

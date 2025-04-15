@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/skip-mev/slinky/pkg/math"
+	"github.com/dydxprotocol/slinky/pkg/math"
 )
 
 func BenchmarkFloat64StringToBigInt(b *testing.B) {

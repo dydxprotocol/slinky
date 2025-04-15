@@ -8,10 +8,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/providers/base"
-	"github.com/skip-mev/slinky/providers/base/testutils"
-	providertypes "github.com/skip-mev/slinky/providers/types"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
+	"github.com/dydxprotocol/slinky/providers/base"
+	"github.com/dydxprotocol/slinky/providers/base/testutils"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
 )
 
 var (
