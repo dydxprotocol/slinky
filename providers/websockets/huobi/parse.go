@@ -7,8 +7,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/providers/base/websocket/handlers"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	"github.com/dydxprotocol/slinky/providers/base/websocket/handlers"
 )
 
 // parseSubscriptionResponse attempts to parse a subscription message. It returns an error if the message

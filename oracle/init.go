@@ -7,10 +7,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/providers/base"
-	mmclienttypes "github.com/skip-mev/slinky/service/clients/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	"github.com/dydxprotocol/slinky/providers/base"
+	mmclienttypes "github.com/dydxprotocol/slinky/service/clients/marketmap/types"
 )
 
 // Init initializes the all providers that are configured via the oracle config.

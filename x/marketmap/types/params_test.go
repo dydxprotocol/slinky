@@ -7,7 +7,7 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 func TestValidateBasic(t *testing.T) {

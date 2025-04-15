@@ -7,9 +7,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/providers/base"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	"github.com/dydxprotocol/slinky/providers/base"
+	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 // UpdateMarketMap updates the oracle's market map and updates the providers'

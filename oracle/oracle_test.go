@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle"
-	"github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/oracle/types"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 var (

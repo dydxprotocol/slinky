@@ -7,11 +7,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/providers/base/api/metrics"
-	providertypes "github.com/skip-mev/slinky/providers/types"
-	"github.com/skip-mev/slinky/service/clients/marketmap/types"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	"github.com/dydxprotocol/slinky/providers/base/api/metrics"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
+	"github.com/dydxprotocol/slinky/service/clients/marketmap/types"
+	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 // MarketMapFetcher is the x/marketmap fetcher. This fetcher is responsible for querying the

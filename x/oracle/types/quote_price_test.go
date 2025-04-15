@@ -8,7 +8,7 @@ import (
 	"cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 
-	"github.com/skip-mev/slinky/x/oracle/types"
+	"github.com/dydxprotocol/slinky/x/oracle/types"
 )
 
 func TestQuotePrice(t *testing.T) {

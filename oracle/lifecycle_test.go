@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/skip-mev/slinky/oracle"
-	oraclefactory "github.com/skip-mev/slinky/providers/factories/oracle"
+	"github.com/dydxprotocol/slinky/oracle"
+	oraclefactory "github.com/dydxprotocol/slinky/providers/factories/oracle"
 )
 
 func TestStart(t *testing.T) {

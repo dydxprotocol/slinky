@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/pkg/math/oracle"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	"github.com/dydxprotocol/slinky/pkg/math/oracle"
+	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 func TestGetProviderPrice(t *testing.T) {

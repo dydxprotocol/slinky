@@ -8,10 +8,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	dydxtypes "github.com/skip-mev/slinky/providers/apis/dydx/types"
-	providertypes "github.com/skip-mev/slinky/providers/types"
-	"github.com/skip-mev/slinky/service/clients/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	dydxtypes "github.com/dydxprotocol/slinky/providers/apis/dydx/types"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
+	"github.com/dydxprotocol/slinky/service/clients/marketmap/types"
 )
 
 var _ types.MarketMapAPIDataHandler = (*APIHandler)(nil)

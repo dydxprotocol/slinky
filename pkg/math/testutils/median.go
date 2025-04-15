@@ -4,10 +4,10 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/skip-mev/slinky/oracle"
-	"github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/pkg/math"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	"github.com/dydxprotocol/slinky/pkg/math"
+	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 var _ oracle.PriceAggregator = &MedianAggregator{}

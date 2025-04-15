@@ -8,11 +8,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	apihandlers "github.com/skip-mev/slinky/providers/base/api/handlers"
-	providermetrics "github.com/skip-mev/slinky/providers/base/metrics"
-	wshandlers "github.com/skip-mev/slinky/providers/base/websocket/handlers"
-	providertypes "github.com/skip-mev/slinky/providers/types"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	apihandlers "github.com/dydxprotocol/slinky/providers/base/api/handlers"
+	providermetrics "github.com/dydxprotocol/slinky/providers/base/metrics"
+	wshandlers "github.com/dydxprotocol/slinky/providers/base/websocket/handlers"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
 )
 
 // Provider implements a base provider that can be used to build other providers.

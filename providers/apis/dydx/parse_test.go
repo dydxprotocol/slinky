@@ -5,17 +5,17 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/skip-mev/slinky/oracle/constants"
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/providers/apis/defi/raydium"
-	"github.com/skip-mev/slinky/providers/apis/defi/uniswapv3"
-	"github.com/skip-mev/slinky/providers/apis/dydx"
-	dydxtypes "github.com/skip-mev/slinky/providers/apis/dydx/types"
-	coinbasews "github.com/skip-mev/slinky/providers/websockets/coinbase"
-	"github.com/skip-mev/slinky/providers/websockets/kucoin"
-	"github.com/skip-mev/slinky/providers/websockets/mexc"
-	"github.com/skip-mev/slinky/providers/websockets/okx"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/oracle/constants"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
+	"github.com/dydxprotocol/slinky/providers/apis/defi/raydium"
+	"github.com/dydxprotocol/slinky/providers/apis/defi/uniswapv3"
+	"github.com/dydxprotocol/slinky/providers/apis/dydx"
+	dydxtypes "github.com/dydxprotocol/slinky/providers/apis/dydx/types"
+	coinbasews "github.com/dydxprotocol/slinky/providers/websockets/coinbase"
+	"github.com/dydxprotocol/slinky/providers/websockets/kucoin"
+	"github.com/dydxprotocol/slinky/providers/websockets/mexc"
+	"github.com/dydxprotocol/slinky/providers/websockets/okx"
+	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 func TestConvertMarketParamsToMarketMap(t *testing.T) {

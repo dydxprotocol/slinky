@@ -22,14 +22,14 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	slinkyabci "github.com/skip-mev/slinky/abci/ve/types"
-	oracleconfig "github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/oracle/types"
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/providers/apis/marketmap"
-	"github.com/skip-mev/slinky/providers/static"
-	mmtypes "github.com/skip-mev/slinky/x/marketmap/types"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
+	slinkyabci "github.com/dydxprotocol/slinky/abci/ve/types"
+	oracleconfig "github.com/dydxprotocol/slinky/oracle/config"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
+	"github.com/dydxprotocol/slinky/providers/apis/marketmap"
+	"github.com/dydxprotocol/slinky/providers/static"
+	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
+	oracletypes "github.com/dydxprotocol/slinky/x/oracle/types"
 )
 
 const (

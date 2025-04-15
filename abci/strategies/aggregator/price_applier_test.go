@@ -9,20 +9,20 @@ import (
 	abcitypes "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/skip-mev/slinky/abci/strategies/aggregator"
-	"github.com/skip-mev/slinky/abci/strategies/aggregator/mocks"
-	"github.com/skip-mev/slinky/abci/strategies/codec"
-	"github.com/skip-mev/slinky/abci/testutils"
-	abcimocks "github.com/skip-mev/slinky/abci/types/mocks"
+	"github.com/dydxprotocol/slinky/abci/strategies/aggregator"
+	"github.com/dydxprotocol/slinky/abci/strategies/aggregator/mocks"
+	"github.com/dydxprotocol/slinky/abci/strategies/codec"
+	"github.com/dydxprotocol/slinky/abci/testutils"
+	abcimocks "github.com/dydxprotocol/slinky/abci/types/mocks"
 
 	"cosmossdk.io/log"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	vetypes "github.com/skip-mev/slinky/abci/ve/types"
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
+	vetypes "github.com/dydxprotocol/slinky/abci/ve/types"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
+	oracletypes "github.com/dydxprotocol/slinky/x/oracle/types"
 )
 
 func TestPriceApplier(t *testing.T) {

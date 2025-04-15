@@ -11,11 +11,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 
-	compression "github.com/skip-mev/slinky/abci/strategies/codec"
-	"github.com/skip-mev/slinky/abci/ve/types"
-	"github.com/skip-mev/slinky/x/oracle/keeper"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
-	"github.com/skip-mev/slinky/x/oracle/types/mocks"
+	compression "github.com/dydxprotocol/slinky/abci/strategies/codec"
+	"github.com/dydxprotocol/slinky/abci/ve/types"
+	"github.com/dydxprotocol/slinky/x/oracle/keeper"
+	oracletypes "github.com/dydxprotocol/slinky/x/oracle/types"
+	"github.com/dydxprotocol/slinky/x/oracle/types/mocks"
 )
 
 // CreateTestOracleKeeperWithGenesis creates a test oracle keeper with the given genesis state.

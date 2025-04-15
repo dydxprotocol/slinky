@@ -8,11 +8,11 @@ import (
 	cometabci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/skip-mev/slinky/abci/strategies/codec"
-	slinkyabcitypes "github.com/skip-mev/slinky/abci/types"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
+	"github.com/dydxprotocol/slinky/abci/strategies/codec"
+	slinkyabcitypes "github.com/dydxprotocol/slinky/abci/types"
+	oracletypes "github.com/dydxprotocol/slinky/x/oracle/types"
 
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
 )
 
 // PriceApplier is an interface used in `ExtendVote` and `PreBlock` to apply the prices

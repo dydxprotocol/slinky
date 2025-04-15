@@ -1,4 +1,4 @@
-module github.com/skip-mev/slinky/tests/simapp
+module github.com/dydxprotocol/slinky/tests/simapp
 
 go 1.23.1
 
@@ -18,7 +18,7 @@ require (
 	github.com/cometbft/cometbft v0.38.15
 	github.com/cosmos/cosmos-db v1.1.0
 	github.com/cosmos/cosmos-sdk v0.50.11
-	github.com/skip-mev/slinky v1.0.1
+	github.com/dydxprotocol/slinky v1.0.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
@@ -203,6 +203,6 @@ require (
 replace (
 	cosmossdk.io/client/v2 => cosmossdk.io/client/v2 v2.0.0-20230719143845-dff6b0e26aa4
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
-	github.com/skip-mev/slinky => ../../
+	github.com/dydxprotocol/slinky => ../../
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 )

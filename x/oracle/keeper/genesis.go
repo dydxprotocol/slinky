@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	"github.com/skip-mev/slinky/x/oracle/types"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
+	"github.com/dydxprotocol/slinky/x/oracle/types"
 )
 
 // InitGenesis initializes the set of CurrencyPairs + their genesis prices (if any) for the x/oracle module.

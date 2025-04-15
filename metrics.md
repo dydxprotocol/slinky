@@ -2,7 +2,7 @@
 
 This document describes the various instrumentation points that are available in the side-car. This should be utilized to monitor the health of Slinky and the services it is proxying.
 
-If there are any additional metrics that you would like to see, please open an issue in the [GitHub repository](https://github.com/skip-mev/slinky). Note that this document is not fully comprehensive and may be updated in the future. However, it should provide a good starting point for monitoring Slinky. It may be useful to read the [configuration overview](./oracle/config/README.md) to understand how the side-car is configured. However, this is NOT necessary.
+If there are any additional metrics that you would like to see, please open an issue in the [GitHub repository](https://github.com/dydxprotocol/slinky). Note that this document is not fully comprehensive and may be updated in the future. However, it should provide a good starting point for monitoring Slinky. It may be useful to read the [configuration overview](./oracle/config/README.md) to understand how the side-car is configured. However, this is NOT necessary.
 
 
 # Table of Contents

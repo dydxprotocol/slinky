@@ -14,12 +14,12 @@ import (
 
 	"github.com/gagliardetto/solana-go/programs/serum"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	oracletypes "github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/pkg/math"
-	"github.com/skip-mev/slinky/providers/apis/defi/raydium/schema"
-	"github.com/skip-mev/slinky/providers/base/api/metrics"
-	providertypes "github.com/skip-mev/slinky/providers/types"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	oracletypes "github.com/dydxprotocol/slinky/oracle/types"
+	"github.com/dydxprotocol/slinky/pkg/math"
+	"github.com/dydxprotocol/slinky/providers/apis/defi/raydium/schema"
+	"github.com/dydxprotocol/slinky/providers/base/api/metrics"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
 )
 
 var _ oracletypes.PriceAPIFetcher = &APIPriceFetcher{}

@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	providertypes "github.com/skip-mev/slinky/providers/types"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
 
-	"github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/pkg/math"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	"github.com/dydxprotocol/slinky/pkg/math"
 )
 
 // parseTickerMessage parses a ticker message received from the Bitstamp websocket API.

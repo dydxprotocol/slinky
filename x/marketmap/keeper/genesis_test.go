@@ -3,8 +3,8 @@ package keeper_test
 import (
 	sdkmath "cosmossdk.io/math"
 
-	"github.com/skip-mev/slinky/x/marketmap/types"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
+	"github.com/dydxprotocol/slinky/x/marketmap/types"
+	oracletypes "github.com/dydxprotocol/slinky/x/oracle/types"
 )
 
 func (s *KeeperTestSuite) TestInitGenesisInvalidGenesis() {

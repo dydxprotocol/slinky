@@ -6,9 +6,9 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	oraclemetrics "github.com/skip-mev/slinky/oracle/metrics"
-	providertypes "github.com/skip-mev/slinky/providers/types"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	oraclemetrics "github.com/dydxprotocol/slinky/oracle/metrics"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
 )
 
 const (

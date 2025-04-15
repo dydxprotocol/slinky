@@ -5,7 +5,7 @@ package mocks
 import (
 	mock "github.com/stretchr/testify/mock"
 
-	metrics "github.com/skip-mev/slinky/providers/base/websocket/metrics"
+	metrics "github.com/dydxprotocol/slinky/providers/base/websocket/metrics"
 
 	time "time"
 )

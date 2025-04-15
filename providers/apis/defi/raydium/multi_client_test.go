@@ -11,10 +11,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/providers/apis/defi/raydium"
-	"github.com/skip-mev/slinky/providers/apis/defi/raydium/mocks"
-	"github.com/skip-mev/slinky/providers/base/api/metrics"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	"github.com/dydxprotocol/slinky/providers/apis/defi/raydium"
+	"github.com/dydxprotocol/slinky/providers/apis/defi/raydium/mocks"
+	"github.com/dydxprotocol/slinky/providers/base/api/metrics"
 )
 
 // TestMultiJSONRPCClient tests the MultiJSONRPCClient.

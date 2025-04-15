@@ -8,10 +8,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/providers/apis/coinmarketcap"
-	"github.com/skip-mev/slinky/providers/base/testutils"
-	providertypes "github.com/skip-mev/slinky/providers/types"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	"github.com/dydxprotocol/slinky/providers/apis/coinmarketcap"
+	"github.com/dydxprotocol/slinky/providers/base/testutils"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
 )
 
 var (

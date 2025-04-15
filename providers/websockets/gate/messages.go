@@ -7,8 +7,8 @@ import (
 	"math"
 	"time"
 
-	slinkymath "github.com/skip-mev/slinky/pkg/math"
-	"github.com/skip-mev/slinky/providers/base/websocket/handlers"
+	slinkymath "github.com/dydxprotocol/slinky/pkg/math"
+	"github.com/dydxprotocol/slinky/providers/base/websocket/handlers"
 )
 
 type (

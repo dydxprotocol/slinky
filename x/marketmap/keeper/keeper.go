@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/skip-mev/slinky/x/marketmap/types"
+	"github.com/dydxprotocol/slinky/x/marketmap/types"
 )
 
 // Keeper is the module's keeper implementation.

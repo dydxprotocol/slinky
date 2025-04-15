@@ -1,6 +1,6 @@
 package keeper
 
-import "github.com/skip-mev/slinky/x/marketmap/types"
+import "github.com/dydxprotocol/slinky/x/marketmap/types"
 
 // Option is a type that modifies a keeper during instantiation.  These can be passed variadically into NewKeeper
 // to specify keeper behavior.

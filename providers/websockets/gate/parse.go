@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	providertypes "github.com/skip-mev/slinky/providers/types"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
 
-	"github.com/skip-mev/slinky/oracle/types"
-	"github.com/skip-mev/slinky/pkg/math"
-	"github.com/skip-mev/slinky/providers/base/websocket/handlers"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	"github.com/dydxprotocol/slinky/pkg/math"
+	"github.com/dydxprotocol/slinky/providers/base/websocket/handlers"
 )
 
 // parseSubscribeResponse attempts to parse a SubscribeResponse to see if it was successful.

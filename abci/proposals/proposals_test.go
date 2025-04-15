@@ -15,16 +15,16 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/skip-mev/slinky/abci/proposals"
-	"github.com/skip-mev/slinky/abci/strategies/codec"
-	codecmocks "github.com/skip-mev/slinky/abci/strategies/codec/mocks"
-	"github.com/skip-mev/slinky/abci/strategies/currencypair"
-	currencypairmocks "github.com/skip-mev/slinky/abci/strategies/currencypair/mocks"
-	"github.com/skip-mev/slinky/abci/testutils"
-	"github.com/skip-mev/slinky/abci/types"
-	"github.com/skip-mev/slinky/abci/ve"
-	servicemetrics "github.com/skip-mev/slinky/service/metrics"
-	servicemetricsmocks "github.com/skip-mev/slinky/service/metrics/mocks"
+	"github.com/dydxprotocol/slinky/abci/proposals"
+	"github.com/dydxprotocol/slinky/abci/strategies/codec"
+	codecmocks "github.com/dydxprotocol/slinky/abci/strategies/codec/mocks"
+	"github.com/dydxprotocol/slinky/abci/strategies/currencypair"
+	currencypairmocks "github.com/dydxprotocol/slinky/abci/strategies/currencypair/mocks"
+	"github.com/dydxprotocol/slinky/abci/testutils"
+	"github.com/dydxprotocol/slinky/abci/types"
+	"github.com/dydxprotocol/slinky/abci/ve"
+	servicemetrics "github.com/dydxprotocol/slinky/service/metrics"
+	servicemetricsmocks "github.com/dydxprotocol/slinky/service/metrics/mocks"
 )
 
 var (

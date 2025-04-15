@@ -1,7 +1,7 @@
 package bitfinex
 
 import (
-	"github.com/skip-mev/slinky/oracle/config"
+	"github.com/dydxprotocol/slinky/oracle/config"
 )
 
 const (

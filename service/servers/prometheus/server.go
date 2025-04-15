@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 
-	"github.com/skip-mev/slinky/pkg/sync"
+	"github.com/dydxprotocol/slinky/pkg/sync"
 )
 
 // stable defaults.

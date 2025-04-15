@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/skip-mev/slinky/pkg/json"
+	"github.com/dydxprotocol/slinky/pkg/json"
 
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
 )
 
 const (

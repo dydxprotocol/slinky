@@ -14,10 +14,10 @@ import (
 	"github.com/skip-mev/petri/provider/v2/docker"
 	"github.com/skip-mev/petri/types/v2"
 
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
+	slinkytypes "github.com/dydxprotocol/slinky/pkg/types"
+	oracletypes "github.com/dydxprotocol/slinky/x/oracle/types"
 
-	"github.com/skip-mev/slinky/tests/simapp"
+	"github.com/dydxprotocol/slinky/tests/simapp"
 )
 
 func GetChainConfig() types.ChainConfig {
@@ -28,12 +28,12 @@ func GetChainConfig() types.ChainConfig {
 		NumNodes:      2,
 		BinaryName:    "slinkyd",
 		Image: provider.ImageDefinition{
-			Image: "skip-mev/slinky-e2e",
+			Image: "dydxprotocol/slinky-e2e",
 			UID:   "1000",
 			GID:   "1000",
 		},
 		SidecarImage: provider.ImageDefinition{
-			Image: "skip-mev/slinky-e2e-oracle",
+			Image: "dydxprotocol/slinky-e2e-oracle",
 			UID:   "1000",
 			GID:   "1000",
 		},

@@ -3,7 +3,7 @@ package oracle
 import (
 	"context"
 
-	"github.com/skip-mev/slinky/service/servers/oracle/types"
+	"github.com/dydxprotocol/slinky/service/servers/oracle/types"
 )
 
 // OracleService defines the service all clients must implement.

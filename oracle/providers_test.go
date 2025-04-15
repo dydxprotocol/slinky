@@ -6,13 +6,13 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/skip-mev/slinky/oracle"
-	"github.com/skip-mev/slinky/oracle/config"
-	"github.com/skip-mev/slinky/oracle/types"
-	mathtestutils "github.com/skip-mev/slinky/pkg/math/testutils"
-	"github.com/skip-mev/slinky/providers/base/testutils"
-	oraclefactory "github.com/skip-mev/slinky/providers/factories/oracle"
-	providertypes "github.com/skip-mev/slinky/providers/types"
+	"github.com/dydxprotocol/slinky/oracle"
+	"github.com/dydxprotocol/slinky/oracle/config"
+	"github.com/dydxprotocol/slinky/oracle/types"
+	mathtestutils "github.com/dydxprotocol/slinky/pkg/math/testutils"
+	"github.com/dydxprotocol/slinky/providers/base/testutils"
+	oraclefactory "github.com/dydxprotocol/slinky/providers/factories/oracle"
+	providertypes "github.com/dydxprotocol/slinky/providers/types"
 )
 
 func (s *OracleTestSuite) TestProviders() {
