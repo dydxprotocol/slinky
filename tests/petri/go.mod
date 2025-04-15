@@ -10,7 +10,7 @@ require (
 	github.com/skip-mev/petri/node/v2 v2.0.1
 	github.com/skip-mev/petri/provider/v2 v2.0.0
 	github.com/skip-mev/petri/types/v2 v2.0.1
-	github.com/dydxprotocol/slinky v1.0.3
+	github.com/dydxprotocol/slinky v1.3.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 )
