@@ -3,8 +3,8 @@ project_name: slinky
 
 release:
   github:
-    owner: skip-mev
-    name: connect
+    owner: dydxprotocol
+    name: slinky
   prerelease: true
 
 builds:
