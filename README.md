@@ -115,6 +115,6 @@ To publish a new release of the `dydxprotocol/slinky` codebase, [follow the offi
 * However, these workflows have not yet been updated for dYdX's use case. (Ex. ECR + GHCR URLs still point to Skip's accounts, still rely on Skip secrets, etc.)
 * This is not an urgent issue, unless the sidecar code itself is updated, or breaking changes are made to the format of the Market Map. 
   * Note: Adding new fields to ex. the `metadata_json` string in Market Map, is not a breaking change (assuming these new fields are not required by the sidecar for price-fetching). 
-* **Next Steps:** 
+* **Next Steps to enable deploys for dYdX's fork of sidecar:** 
   * Update the URLs and secrets in `build-docker.yml` to deploy to dYdX's ECR / GHCR repos. 
   * Update `v4-chain`'s `docker-compose.yml` to pull from dYdX's repos when building the `slinky0` (sidecar) image.
