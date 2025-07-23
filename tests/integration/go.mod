@@ -8,9 +8,9 @@ replace (
 	github.com/vedhavyas/go-subkey => github.com/strangelove-ventures/go-subkey v1.0.7
 )
 
-go 1.24
+go 1.23.1
 
-toolchain go1.24.4
+toolchain go1.24.5
 
 require (
 	cosmossdk.io/math v1.4.0

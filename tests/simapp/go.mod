@@ -1,8 +1,8 @@
 module github.com/dydxprotocol/slinky/tests/simapp
 
-go 1.24
+go 1.23.1
 
-toolchain go1.24.4
+toolchain go1.24.5
 
 require (
 	cosmossdk.io/api v0.7.6
