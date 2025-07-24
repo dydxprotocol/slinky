@@ -3,8 +3,8 @@ module github.com/dydxprotocol/slinky/tests/integration
 replace (
 	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d
 	github.com/ChainSafe/go-schnorrkel/1 => github.com/ChainSafe/go-schnorrkel v1.0.0
-	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/dydxprotocol/slinky => ../../
+	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/vedhavyas/go-subkey => github.com/strangelove-ventures/go-subkey v1.0.7
 )
 
@@ -16,8 +16,8 @@ require (
 	cosmossdk.io/math v1.4.0
 	github.com/cometbft/cometbft v0.38.15
 	github.com/cosmos/cosmos-sdk v0.50.11
-	github.com/pelletier/go-toml/v2 v2.2.3
 	github.com/dydxprotocol/slinky v1.0.4
+	github.com/pelletier/go-toml/v2 v2.2.3
 	github.com/strangelove-ventures/interchaintest/v8 v8.8.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0

@@ -38,3 +38,4 @@ run.go
 
 *.log*
 oracle.json
+.aider*
