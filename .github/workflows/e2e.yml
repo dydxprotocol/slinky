@@ -1,5 +1,5 @@
 name: E2E tests
-on: 
+on:
   pull_request:
     paths-ignore:
       - docs/**
@@ -7,10 +7,13 @@ on:
       - main
       - release/v1.x.x
   workflow_dispatch:
-    
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -25,6 +28,10 @@ jobs:
             **/*.go
             go.mod
             go.sum
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Pull slinky-dev-base image
+        run: docker pull ghcr.io/dydxprotocol/slinky/slinky-dev-base:latest
       - name: tests
         if: env.GIT_DIFF
         run: |
