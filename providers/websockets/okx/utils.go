@@ -18,9 +18,6 @@ const (
 	// URL_PROD is the public OKX Websocket URL.
 	URL_PROD = "wss://ws.okx.com:8443/ws/v5/public"
 
-	// URL_PROD_AWS is the public OKX Websocket URL hosted on AWS.
-	URL_PROD_AWS = "wss://wsaws.okx.com:8443/ws/v5/public"
-
 	// URL_DEMO is the public OKX Websocket URL for test usage.
 	URL_DEMO = "wss://wspap.okx.com:8443/ws/v5/public?brokerId=9999"
 
@@ -52,7 +49,7 @@ var DefaultWebSocketConfig = config.WebSocketConfig{
 	MaxBufferSize:                 config.DefaultMaxBufferSize,
 	ReconnectionTimeout:           config.DefaultReconnectionTimeout,
 	PostConnectionTimeout:         config.DefaultPostConnectionTimeout,
-	Endpoints:                     []config.Endpoint{{URL: URL_PROD_AWS}},
+	Endpoints:                     []config.Endpoint{{URL: URL_PROD}},
 	ReadBufferSize:                config.DefaultReadBufferSize,
 	WriteBufferSize:               config.DefaultWriteBufferSize,
 	HandshakeTimeout:              config.DefaultHandshakeTimeout,
