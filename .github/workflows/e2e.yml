@@ -31,7 +31,7 @@ jobs:
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
       - name: Pull slinky-dev-base image
-        run: docker pull ghcr.io/dydxprotocol/slinky/slinky-dev-base:latest
+        run: docker pull ghcr.io/dydxprotocol/slinky-dev-base:latest
       - name: tests
         if: env.GIT_DIFF
         run: |
