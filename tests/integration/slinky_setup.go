@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"sort"
@@ -578,7 +579,8 @@ func (s *SlinkyIntegrationSuite) AddCurrencyPairs(chain *cosmos.CosmosChain, use
 	}
 
 	if txResp.TxResult.Code != abcitypes.CodeTypeOK {
-		return fmt.Errorf(txResp.TxResult.Log)
+		// log the error string but don't format it
+		return errors.New(txResp.TxResult.Log)
 	}
 
 	time.Sleep(2 * time.Second)
@@ -624,7 +626,7 @@ func (s *SlinkyIntegrationSuite) RemoveMarket(
 	}
 
 	if resp.TxResult.Code != abcitypes.CodeTypeOK {
-		return fmt.Errorf(resp.TxResult.Log)
+		return errors.New(resp.TxResult.Log)
 	}
 
 	// check market map and lastUpdated
@@ -657,7 +659,7 @@ func (s *SlinkyIntegrationSuite) UpdateCurrencyPair(chain *cosmos.CosmosChain, m
 	}
 
 	if txResp.TxResult.Code != abcitypes.CodeTypeOK {
-		return fmt.Errorf(txResp.TxResult.Log)
+		return errors.New(txResp.TxResult.Log)
 	}
 
 	// check market map and lastUpdated
