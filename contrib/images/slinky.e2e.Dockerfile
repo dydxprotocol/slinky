@@ -1,4 +1,4 @@
-FROM ghcr.io/dydxprotocol/slinky/slinky-dev-base AS builder
+FROM ghcr.io/dydxprotocol/slinky-dev-base AS builder
 
 LABEL org.opencontainers.image.source="https://github.com/dydxprotocol/slinky"
 
@@ -13,7 +13,7 @@ COPY . .
 RUN make build-test-app
 
 ## Prepare the final clear binary
-## This will expose the tendermint and cosmos ports alongside 
+## This will expose the tendermint and cosmos ports alongside
 ## starting up the sim app and the slinky daemon
 FROM ubuntu:rolling
 EXPOSE 26656 26657 1317 9090 7171 26655 8081 26660
