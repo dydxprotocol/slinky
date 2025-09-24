@@ -15,12 +15,12 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v6
         with:
-          go-version: 1.23.3
-          cache: true
-          cache-dependency-path: go.sum
+          go-version: 1.25.1
+
       - uses: technote-space/get-diff-action@v6.1.2
         id: git_diff
         with:
@@ -28,10 +28,13 @@ jobs:
             **/*.go
             go.mod
             go.sum
+
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
       - name: Pull slinky-dev-base image
         run: docker pull ghcr.io/dydxprotocol/slinky-dev-base:latest
+
       - name: tests
         if: env.GIT_DIFF
         run: |
