@@ -75,7 +75,7 @@ stop-sidecar-dev:
 	@$(DOCKER_COMPOSE) -f $(DEV_COMPOSE) --profile sidecar down
 
 install: tidy
-	@go install -ldflags="$(BUILD_TAGS)" -mod=readonly ./cmd/slinky
+	@go install -ldflags="$(BUILD_TAGS)" ./cmd/slinky
 
 .PHONY: build install run-oracle-client start-all-dev stop-all-dev
 
@@ -84,9 +84,13 @@ install: tidy
 ###############################################################################
 
 docker-build:
-	@echo "Building E2E Docker image..."
-	@DOCKER_BUILDKIT=1 $(DOCKER) build -t dydxprotocol/slinky-e2e -f contrib/images/slinky.e2e.Dockerfile .
-	@DOCKER_BUILDKIT=1 $(DOCKER) build -t dydxprotocol/slinky-e2e-oracle -f contrib/images/slinky.sidecar.dev.Dockerfile .
+	@echo "Building Docker images..."
+	docker buildx build -t dydxprotocol/slinky-base        -f contrib/images/slinky.base.Dockerfile .         --platform linux/arm64,linux/amd64
+	docker buildx build -t dydxprotocol/slinky-dev-base    -f contrib/images/slinky.dev.base.Dockerfile .     --platform linux/arm64,linux/amd64
+	docker buildx build -t dydxprotocol/slinky-simapp      -f contrib/images/slinky.e2e.Dockerfile .          --platform linux/arm64,linux/amd64
+	docker buildx build -t dydxprotocol/slinky-testapp     -f contrib/images/slinky.local.Dockerfile .        --platform linux/arm64,linux/amd64
+	docker buildx build -t dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .  --platform linux/arm64,linux/amd64
+	docker buildx build -t dydxprotocol/slinky-sidecar     -f contrib/images/slinky.sidecar.prod.Dockerfile . --platform linux/arm64,linux/amd64
 
 .PHONY: docker-build
 
@@ -145,7 +149,7 @@ BUILD_TARGETS := build-test-app
 build-test-app: BUILD_ARGS=-o $(BUILD_DIR)/
 
 $(BUILD_TARGETS): $(BUILD_DIR)/
-	@cd $(CURDIR)/tests/simapp && go build -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+	@cd $(CURDIR)/tests/simapp && go build $(BUILD_FLAGS) $(BUILD_ARGS) ./...
 
 $(BUILD_DIR)/:
 	@mkdir -p $(BUILD_DIR)/
