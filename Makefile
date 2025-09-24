@@ -92,7 +92,12 @@ docker-build:
 	docker buildx build -t dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .  --platform linux/arm64,linux/amd64
 	docker buildx build -t dydxprotocol/slinky-sidecar     -f contrib/images/slinky.sidecar.prod.Dockerfile . --platform linux/arm64,linux/amd64
 
-.PHONY: docker-build
+e2e-docker-build:
+	@echo "Building Docker images..."
+	docker buildx build -t dydxprotocol/slinky-simapp      -f contrib/images/slinky.e2e.Dockerfile .          --platform linux/arm64,linux/amd64
+	docker buildx build -t dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .  --platform linux/arm64,linux/amd64
+
+.PHONY: docker-build e2e-docker-build
 
 ###############################################################################
 ###                                Test App                                 ###
@@ -149,7 +154,7 @@ BUILD_TARGETS := build-test-app
 build-test-app: BUILD_ARGS=-o $(BUILD_DIR)/
 
 $(BUILD_TARGETS): $(BUILD_DIR)/
-	@cd $(CURDIR)/tests/simapp && go build $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+	@cd $(CURDIR)/tests/simapp && go build -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
 
 $(BUILD_DIR)/:
 	@mkdir -p $(BUILD_DIR)/
@@ -188,11 +193,11 @@ build-and-start-app: build-configs start-app
 ###                               Testing                                   ###
 ###############################################################################
 
-test-integration: tidy docker-build
+test-integration: tidy e2e-docker-build
 	@echo "Running integration tests..."
 	@cd ./tests/integration &&  go test -p 1 -v -race -timeout 30m
 
-test-petri-integ: tidy docker-build
+test-petri-integ: tidy e2e-docker-build
 	@echo "Running petri integration tests..."
 	@cd ./tests/petri &&  go test -p 1 -v -race -timeout 30m
 
