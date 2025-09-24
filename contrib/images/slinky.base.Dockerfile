@@ -1,4 +1,4 @@
-FROM golang:1.23-bullseye AS builder
+FROM golang:1.25.1-trixie AS builder
 
 LABEL org.opencontainers.image.source="https://github.com/dydxprotocol/slinky"
 
