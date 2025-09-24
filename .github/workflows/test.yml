@@ -22,11 +22,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+      - run: |
+          set -euo pipefail
+          GO_VERSION=$(awk '/^go / {print $2}' go.mod)
+          echo "$GO_VERSION" > expected
+          diff -u expected .go-version
 
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.25.1
+          go-version-file: .go-version
 
       - name: Git Diff
         uses: technote-space/get-diff-action@v6.1.2
