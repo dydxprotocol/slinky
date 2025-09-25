@@ -12,7 +12,7 @@ COPY . .
 
 RUN make build
 
-FROM gcr.io/distroless/base-debian11:debug
+FROM ghcr.io/distroless/base-debian11:debug
 EXPOSE 8080 8002
 
 COPY --from=builder /src/slinky/build/* /usr/local/bin/
