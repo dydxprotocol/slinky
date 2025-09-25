@@ -20,7 +20,7 @@ import (
 
 var (
 	image = ibc.DockerImage{
-		Repository: "dydxprotocol/slinky-e2e",
+		Repository: "ghcr.io/dydxprotocol/slinky-sim-app",
 		Version:    "latest",
 		UIDGID:     "1000:1000",
 	}
@@ -31,7 +31,7 @@ var (
 	gasAdjustment = 1.5
 
 	oracleImage = ibc.DockerImage{
-		Repository: "dydxprotocol/slinky-e2e-oracle",
+		Repository: "ghcr.io/dydxprotocol/slinky-e2e-sidecar",
 		Version:    "latest",
 		UIDGID:     "1000:1000",
 	}
