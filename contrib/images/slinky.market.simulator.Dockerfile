@@ -1,11 +1,24 @@
-FROM golang:1.23 AS builder
+FROM golang:1.25.1 AS builder
 LABEL org.opencontainers.image.source="https://github.com/dydxprotocol/slinky"
 
 WORKDIR /src/slinky
-COPY go.mod .
-RUN go mod download
+ENV GOCACHE=/root/.cache/go-build
+ENV GOMODCACHE=/go/pkg/mod
+
+RUN --mount=type=cache,target=${GOMODCACHE} \
+    --mount=type=cache,target=${GOCACHE} \
+    go env
+
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=${GOMODCACHE} \
+    --mount=type=cache,target=${GOCACHE} \
+    go mod download
+
 COPY . .
-RUN make build
+RUN --mount=type=cache,target=${GOMODCACHE} \
+    --mount=type=cache,target=${GOCACHE} \
+    make build
+
 RUN mkdir -p /data
 VOLUME /data
 

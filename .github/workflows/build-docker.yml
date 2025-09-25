@@ -21,6 +21,7 @@ jobs:
           {file: "slinky.local.Dockerfile", name: "slinky-local-app"},
           {file: "slinky.sidecar.e2e.Dockerfile", name: "slinky-e2e-sidecar"},
           {file: "slinky.sidecar.prod.Dockerfile", name: "slinky-sidecar"},
+          {file: "slinky.market.simulator.Dockerfile", name: "slinky-market-simulator"},
         ]
     runs-on: ubuntu-latest
     permissions:
@@ -51,6 +52,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -59,3 +69,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           file: "./contrib/images/${{ matrix.image.file }}"
           tags: ghcr.io/${{ github.repository }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

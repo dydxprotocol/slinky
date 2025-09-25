@@ -1,16 +1,23 @@
 FROM ghcr.io/dydxprotocol/slinky-dev-base AS builder
-
 LABEL org.opencontainers.image.source="https://github.com/dydxprotocol/slinky"
 
 WORKDIR /src/slinky
+ENV GOCACHE=/root/.cache/go-build
+ENV GOMODCACHE=/go/pkg/mod
 
-COPY go.mod .
+RUN --mount=type=cache,target=${GOMODCACHE} \
+    --mount=type=cache,target=${GOCACHE} \
+    go env
 
-RUN go mod download
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=${GOMODCACHE} \
+    --mount=type=cache,target=${GOCACHE} \
+    go mod download
 
 COPY . .
-
-RUN make build-sim-app
+RUN --mount=type=cache,target=${GOMODCACHE} \
+    --mount=type=cache,target=${GOCACHE} \
+    make build-sim-app
 
 ## Prepare the final clear binary
 ## This will expose the tendermint and cosmos ports alongside

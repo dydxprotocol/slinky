@@ -41,6 +41,15 @@ jobs:
       - name: Pull slinky-dev-base image
         run: docker pull ghcr.io/dydxprotocol/slinky-dev-base:latest
 
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: tests
         if: env.GIT_DIFF
         run: |

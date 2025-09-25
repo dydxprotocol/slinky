@@ -1,1 +1,13 @@
 go.work*
+#.git
+#**/.git
+~/.cache/go-build
+~/go/pkg/mod
+/go/pkg/mod
+/root/.cache/go-build
+/go.work
+/build
+/.buildx-cache
+/Users/*/Library/Caches/go-build
+/Users/*/go/pkg/mod
+/src

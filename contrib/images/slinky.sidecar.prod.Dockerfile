@@ -1,18 +1,25 @@
 FROM ghcr.io/dydxprotocol/slinky-dev-base AS builder
-
 LABEL org.opencontainers.image.source="https://github.com/dydxprotocol/slinky"
 
 WORKDIR /src/slinky
+ENV GOCACHE=/root/.cache/go-build
+ENV GOMODCACHE=/go/pkg/mod
 
-COPY go.mod .
+RUN --mount=type=cache,target=${GOMODCACHE} \
+    --mount=type=cache,target=${GOCACHE} \
+    go env
 
-RUN go mod download
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=${GOMODCACHE} \
+    --mount=type=cache,target=${GOCACHE} \
+    go mod download
 
 COPY . .
+RUN --mount=type=cache,target=${GOMODCACHE} \
+    --mount=type=cache,target=${GOCACHE} \
+    make build
 
-RUN make build
-
-FROM ghcr.io/distroless/base-debian11:debug
+FROM gcr.io/distroless/base-debian11:debug
 EXPOSE 8080 8002
 
 COPY --from=builder /src/slinky/build/* /usr/local/bin/
