@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY . .
 
-RUN make build-test-app
+RUN make build-sim-app
 
 ## Prepare the final clear binary
 ## This will expose the tendermint and cosmos ports alongside

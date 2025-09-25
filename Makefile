@@ -87,14 +87,14 @@ docker-build:
 	@echo "Building Docker images..."
 	docker buildx build -t dydxprotocol/slinky-base        -f contrib/images/slinky.base.Dockerfile .         --platform linux/arm64,linux/amd64
 	docker buildx build -t dydxprotocol/slinky-dev-base    -f contrib/images/slinky.dev.base.Dockerfile .     --platform linux/arm64,linux/amd64
-	docker buildx build -t dydxprotocol/slinky-simapp      -f contrib/images/slinky.e2e.Dockerfile .          --platform linux/arm64,linux/amd64
+	docker buildx build -t dydxprotocol/slinky-simapp      -f contrib/images/slinky.sim.app.Dockerfile .          --platform linux/arm64,linux/amd64
 	docker buildx build -t dydxprotocol/slinky-testapp     -f contrib/images/slinky.local.Dockerfile .        --platform linux/arm64,linux/amd64
 	docker buildx build -t dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .  --platform linux/arm64,linux/amd64
 	docker buildx build -t dydxprotocol/slinky-sidecar     -f contrib/images/slinky.sidecar.prod.Dockerfile . --platform linux/arm64,linux/amd64
 
 e2e-docker-build:
 	@echo "Building Docker images..."
-	docker buildx build -t dydxprotocol/slinky-simapp      -f contrib/images/slinky.e2e.Dockerfile .          --platform linux/arm64,linux/amd64
+	docker buildx build -t dydxprotocol/slinky-simapp      -f contrib/images/slinky.sim.app.Dockerfile .          --platform linux/arm64,linux/amd64
 	docker buildx build -t dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .  --platform linux/arm64,linux/amd64
 
 .PHONY: docker-build e2e-docker-build
@@ -149,9 +149,9 @@ ifeq (,$(findstring nostrip,$(COSMOS_BUILD_OPTIONS)))
   BUILD_FLAGS += -trimpath
 endif
 
-BUILD_TARGETS := build-test-app
+BUILD_TARGETS := build-sim-app
 
-build-test-app: BUILD_ARGS=-o $(BUILD_DIR)/
+build-sim-app: BUILD_ARGS=-o $(BUILD_DIR)/
 
 $(BUILD_TARGETS): $(BUILD_DIR)/
 	@cd $(CURDIR)/tests/simapp && go build -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
@@ -187,7 +187,7 @@ start-app:
 # This will allow users to bootstrap their wallet with a balance.
 build-and-start-app: build-configs start-app
 
-.PHONY: build-test-app build-configs build-and-start-app start-app delete-configs
+.PHONY: build-sim-app build-configs build-and-start-app start-app delete-configs
 
 ###############################################################################
 ###                               Testing                                   ###

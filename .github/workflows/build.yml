@@ -31,4 +31,4 @@ jobs:
 
       - name: Build chain and sidecar
         run: |
-          make build-test-app && make build
+          make build-sim-app && make build

@@ -17,8 +17,8 @@ jobs:
         image: [
           {file: "slinky.base.Dockerfile", name: "slinky-base"},
           {file: "slinky.dev.base.Dockerfile", name: "slinky-dev-base"},
-          {file: "slinky.e2e.Dockerfile", name: "slinky-simapp"},
-          {file: "slinky.local.Dockerfile", name: "slinky-testapp"},
+          {file: "slinky.sim.app.Dockerfile", name: "slinky-sim-app"},
+          {file: "slinky.local.Dockerfile", name: "slinky-local-app"},
           {file: "slinky.sidecar.e2e.Dockerfile", name: "slinky-e2e-sidecar"},
           {file: "slinky.sidecar.prod.Dockerfile", name: "slinky-sidecar"},
         ]

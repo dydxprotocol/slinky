@@ -6,7 +6,7 @@ services:
   market_generator:
     build:
       context: ../..
-      dockerfile: ./contrib/images/slinky.generator.dev.Dockerfile
+      dockerfile: ./contrib/images/slinky.market.simulator.Dockerfile
     entrypoint: [
       "/usr/local/bin/scripts",
       "--use-core=$USE_CORE_MARKETS",
@@ -70,12 +70,12 @@ services:
       context: ../..
       dockerfile: ./contrib/images/slinky.local.Dockerfile
     ports:
+      - "1317:1317" # used to query the blockchain
+      - "26655:26655"
       - "26656:26656"
       - "26657:26657"
       - "26660:26660" # chain side metrics
-      - "1317:1317" # used to query the blockchain
       - "7171:7171"
-      - "26655:26655"
       - "9090:9090"
     networks:
       - oracle_network
@@ -94,9 +94,9 @@ services:
       "--run-pprof",
     ]
     ports:
-      - "8080:8080" # main oracle port
-      - "6060:6060" # pprof port
-      - "8002:8002" # metrics port
+      - "6060:6060" # pprof
+      - "8002:8002" # metrics
+      - "8080:8080" # oracle api
     networks:
       - oracle_network
     profiles:
