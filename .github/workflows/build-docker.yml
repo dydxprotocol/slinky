@@ -69,6 +69,7 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           platforms: linux/amd64, linux/arm64
           file: "./contrib/images/${{ matrix.image.file }}"
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/dydxprotocol/${{ matrix.image.name }}:latest
           cache-from: type=gha,scope=${{ matrix.image.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image.name }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
