@@ -31,7 +31,7 @@ jobs:
           echo "GOARCH=${{ matrix.arch }}" >> $GITHUB_ENV
 
       - name: Clear Go module cache dir
-        run: rm -rf ~/go/pkg/mod
+        run: sudo rm -rf ~/go/pkg/mod
 
       - uses: actions/cache@v4
         with:
