@@ -1,4 +1,4 @@
-FROM ghcr.io/dydxprotocol/slinky-dev-base AS builder
+FROM ghcr.io/dydxprotocol/slinky-base AS builder
 LABEL org.opencontainers.image.source="https://github.com/dydxprotocol/slinky"
 
 WORKDIR /src/slinky

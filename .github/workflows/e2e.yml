@@ -41,8 +41,8 @@ jobs:
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: Pull slinky-dev-base image
-        run: docker pull ghcr.io/dydxprotocol/slinky-dev-base:latest
+      - name: Pull slinky-base image
+        run: docker pull ghcr.io/dydxprotocol/slinky-base:latest
 
       - name: Clear Go module cache dir
         run: sudo rm -rf ~/go/pkg/mod

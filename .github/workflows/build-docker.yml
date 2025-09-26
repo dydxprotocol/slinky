@@ -16,13 +16,14 @@ jobs:
       matrix:
         image: [
           {file: "slinky.base.Dockerfile", name: "slinky-base"},
-          {file: "slinky.dev.base.Dockerfile", name: "slinky-dev-base"},
+          {file: "slinky.dev.base.Dockerfile", name: "slinky-base"},
           {file: "slinky.sim.app.Dockerfile", name: "slinky-sim-app"},
           {file: "slinky.local.Dockerfile", name: "slinky-local-app"},
           {file: "slinky.sidecar.e2e.Dockerfile", name: "slinky-e2e-sidecar"},
-          {file: "slinky.sidecar.prod.Dockerfile", name: "slinky-sidecar"},
+          {file: "slinky.sidecar.Dockerfile", name: "slinky-sidecar"},
           {file: "slinky.market.simulator.Dockerfile", name: "slinky-market-simulator"},
         ]
+        platforms: [linux/amd64, linux/arm64]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -49,7 +50,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: arm64,amd64
+          platforms: arm64
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -68,7 +69,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name == 'push' }}
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platforms }}
           file: "./contrib/images/${{ matrix.image.file }}"
           tags: ghcr.io/${{ github.repository }}:latest
           cache-from: type=gha

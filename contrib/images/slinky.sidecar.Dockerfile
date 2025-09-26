@@ -1,4 +1,4 @@
-FROM ghcr.io/dydxprotocol/slinky-dev-base AS builder
+FROM ghcr.io/dydxprotocol/slinky-base AS builder
 LABEL org.opencontainers.image.source="https://github.com/dydxprotocol/slinky"
 
 WORKDIR /src/slinky
@@ -19,7 +19,7 @@ RUN --mount=type=cache,target=${GOMODCACHE} \
     --mount=type=cache,target=${GOCACHE} \
     make build
 
-FROM gcr.io/distroless/base-debian11:debug
+FROM gcr.io/distroless/base-debian12:debug
 EXPOSE 8080 8002
 
 COPY --from=builder /src/slinky/build/* /usr/local/bin/
