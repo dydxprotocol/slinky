@@ -44,6 +44,9 @@ jobs:
       - name: Pull slinky-dev-base image
         run: docker pull ghcr.io/dydxprotocol/slinky-dev-base:latest
 
+      - name: Clear Go module cache dir
+        run: rm -rf ~/go/pkg/mod
+
       - uses: actions/cache@v4
         with:
           path: |
@@ -52,8 +55,6 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-        env:
-          TAR_OPTIONS: --overwrite
 
       - name: tests
         if: env.GIT_DIFF

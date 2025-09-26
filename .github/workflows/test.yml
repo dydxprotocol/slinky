@@ -34,6 +34,9 @@ jobs:
           go-version-file: .go-version
           check-latest: false
 
+      - name: Clear Go module cache dir
+        run: rm -rf ~/go/pkg/mod
+
       - uses: actions/cache@v4
         with:
           path: |

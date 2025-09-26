@@ -30,6 +30,9 @@ jobs:
           echo "GOOS=${{ matrix.os }}" >> $GITHUB_ENV
           echo "GOARCH=${{ matrix.arch }}" >> $GITHUB_ENV
 
+      - name: Clear Go module cache dir
+        run: rm -rf ~/go/pkg/mod
+
       - uses: actions/cache@v4
         with:
           path: |
@@ -38,8 +41,6 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-        env:
-          TAR_OPTIONS: --overwrite
 
       - name: Build chain and sidecar
         run: |
