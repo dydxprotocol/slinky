@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   golangci:
-    name: Lint Go code
+    name: Lint Go
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -56,20 +56,11 @@ jobs:
           go-version-file: .go-version
           check-latest: false
 
-      - name: Git Diff
-        uses: technote-space/get-diff-action@v6.1.2
-        id: git_diff
-        with:
-          PATTERNS: |
-            **/*.go
-            go.mod
-            go.sum
-
       - name: Run govulncheck
         id: govulncheck
         uses: golang/govulncheck-action@v1
         with:
-          go-version-input: 1.25.1
+          go-version-file: .go-version
           go-package: ./...
 
       - name: Run gosec
