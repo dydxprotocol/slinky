@@ -42,6 +42,8 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+        env:
+          TAR_OPTIONS: --overwrite
 
       - name: Git Diff
         uses: technote-space/get-diff-action@v6.1.2
