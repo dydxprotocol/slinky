@@ -23,6 +23,7 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: .go-version
+          check-latest: false
 
       - name: Unshallow
         run: git fetch --prune --unshallow

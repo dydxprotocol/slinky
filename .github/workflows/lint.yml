@@ -23,6 +23,7 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: .go-version
+          check-latest: false
 
       - name: Lint code
         uses: golangci/golangci-lint-action@v6
@@ -53,6 +54,7 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: .go-version
+          check-latest: false
 
       - name: Git Diff
         uses: technote-space/get-diff-action@v6.1.2
