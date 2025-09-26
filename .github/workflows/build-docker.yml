@@ -22,7 +22,6 @@ jobs:
           {file: "slinky.sidecar.Dockerfile", name: "slinky-sidecar"},
           {file: "slinky.market.simulator.Dockerfile", name: "slinky-market-simulator"},
         ]
-        platforms: [linux/amd64, linux/arm64]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -68,7 +67,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name == 'push' }}
-          platforms: ${{ matrix.platforms }}
+          platforms: linux/amd64, linux/arm64
           file: "./contrib/images/${{ matrix.image.file }}"
           tags: ghcr.io/${{ github.repository }}:latest
           cache-from: type=gha
