@@ -85,11 +85,11 @@ install: tidy
 
 docker-build:
 	@echo "Building Docker images..."
-	docker buildx build -t ghcr.io/dydxprotocol/slinky-base        -f contrib/images/slinky.base.Dockerfile .         --platform linux/arm64,linux/amd64
-	docker buildx build -t ghcr.io/dydxprotocol/slinky-sim-app      -f contrib/images/slinky.sim.app.Dockerfile .     --platform linux/arm64,linux/amd64
-	docker buildx build -t ghcr.io/dydxprotocol/slinky-local-app     -f contrib/images/slinky.local.Dockerfile .      --platform linux/arm64,linux/amd64
-	docker buildx build -t ghcr.io/dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .  --platform linux/arm64,linux/amd64
-	docker buildx build -t ghcr.io/dydxprotocol/slinky-sidecar     -f contrib/images/slinky.sidecar.Dockerfile .      --platform linux/arm64,linux/amd64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-base        -f contrib/images/slinky.base.Dockerfile .         --platform linux/amd64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sim-app      -f contrib/images/slinky.sim.app.Dockerfile .     --platform linux/amd64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-local-app     -f contrib/images/slinky.local.Dockerfile .      --platform linux/amd64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .  --platform linux/amd64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sidecar     -f contrib/images/slinky.sidecar.Dockerfile .      --platform linux/amd64
 
 e2e-docker-build:
 	@echo "Building Docker images..."
