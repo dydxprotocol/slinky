@@ -95,8 +95,8 @@ e2e-docker-build:
 	@echo "Building Docker images..."
 	# don't build for multiple platforms - build in native arch for e2e test runner
 	# load to cache to provide local image for e2e test runner
-	docker buildx build --load --cache-from=type=local,src=.buildx-cache --cache-to=type=local,dest=.buildx-cache,mode=max,compression=zstd -t ghcr.io/dydxprotocol/slinky-sim-app     -f contrib/images/slinky.sim.app.Dockerfile .
-	docker buildx build --load --cache-from=type=local,src=.buildx-cache --cache-to=type=local,dest=.buildx-cache,mode=max,compression=zstd -t ghcr.io/dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .
+	docker buildx build --load --cache-from=type=local,src=.buildx-cache,scope=slinky-sim-app --cache-to=type=local,dest=.buildx-cache,mode=max,compression=zstd,scope=slinky-sim-app -t ghcr.io/dydxprotocol/slinky-sim-app     -f contrib/images/slinky.sim.app.Dockerfile .
+	docker buildx build --load --cache-from=type=local,src=.buildx-cache,scope=slinky-e2e-sidecar --cache-to=type=local,dest=.buildx-cache,mode=max,compression=zstd,scope=slinky-e2e-sidecar -t ghcr.io/dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .
 
 .PHONY: docker-build e2e-docker-build
 
