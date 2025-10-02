@@ -85,11 +85,23 @@ install: tidy
 
 docker-build:
 	@echo "Building Docker images..."
-	docker buildx build -t ghcr.io/dydxprotocol/slinky-base        -f contrib/images/slinky.base.Dockerfile .         --platform linux/amd64
-	docker buildx build -t ghcr.io/dydxprotocol/slinky-sim-app      -f contrib/images/slinky.sim.app.Dockerfile .     --platform linux/amd64
-	docker buildx build -t ghcr.io/dydxprotocol/slinky-local-app     -f contrib/images/slinky.local.Dockerfile .      --platform linux/amd64
-	docker buildx build -t ghcr.io/dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .  --platform linux/amd64
-	docker buildx build -t ghcr.io/dydxprotocol/slinky-sidecar     -f contrib/images/slinky.sidecar.Dockerfile .      --platform linux/amd64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-base             -f contrib/images/slinky.base.Dockerfile .         	   --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-e2e-sidecar      -f contrib/images/slinky.sidecar.e2e.Dockerfile .      --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-local-app        -f contrib/images/slinky.local.Dockerfile .      	   --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-market-simulator -f contrib/images/slinky.market.simulator.Dockerfile . --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sidecar          -f contrib/images/slinky.sidecar.Dockerfile .      	   --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sidecar-dev      -f contrib/images/slinky.sidecar.dev.Dockerfile .      --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sim-app          -f contrib/images/slinky.sim.app.Dockerfile .     	   --platform linux/amd64,linux/arm64
+
+docker-push:
+	@echo "Pushing Docker images..."
+	docker push ghcr.io/dydxprotocol/slinky-base
+	docker push ghcr.io/dydxprotocol/slinky-e2e-sidecar
+	docker push ghcr.io/dydxprotocol/slinky-local-app
+	docker push ghcr.io/dydxprotocol/slinky-market-simulator
+	docker push ghcr.io/dydxprotocol/slinky-sidecar
+	docker push ghcr.io/dydxprotocol/slinky-sidecar-dev
+	docker push ghcr.io/dydxprotocol/slinky-sim-app
 
 e2e-docker-build:
 	@echo "Building Docker images..."

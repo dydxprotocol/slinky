@@ -23,6 +23,9 @@ RUN mkdir -p /data
 VOLUME /data
 
 FROM ubuntu:rolling
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends jq ca-certificates make git curl bash dasel \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /src/slinky/build/* /usr/local/bin/
 
 ENTRYPOINT ["/usr/local/bin/scripts"]

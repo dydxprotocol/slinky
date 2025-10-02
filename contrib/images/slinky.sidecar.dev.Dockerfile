@@ -20,9 +20,11 @@ RUN --mount=type=cache,target=${GOMODCACHE} \
     make build
 
 FROM ubuntu:rolling
-EXPOSE 8080 8002
-
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends jq ca-certificates make git curl bash dasel \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /src/slinky/build/* /usr/local/bin/
 
 WORKDIR /usr/local/bin/
+EXPOSE 8080 8002
 ENTRYPOINT [ "slinky" ]
