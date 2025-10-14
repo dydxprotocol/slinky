@@ -7,9 +7,8 @@ import (
 )
 
 const (
-
 	Name = "okx_ws"
-	URL = "wss://ws.okx.com:8443/ws/v5/public"
+	URL  = "wss://ws.okx.com:8443/ws/v5/public"
 
 	// WriteInterval is the interval at which the OKX Websocket will write to the connection.
 	// By default, there can be 3 messages written to the connection every second. Or 480

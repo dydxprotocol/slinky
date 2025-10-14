@@ -14,7 +14,7 @@ const (
 	Name = "mexc_ws"
 
 	// WSS is the public MEXC Websocket URL.
-	WSS = "wss://wbs.mexc.com/ws"
+	WSS = "wss://wbs-api.mexc.com/ws"
 
 	// DefaultPingInterval is the default ping interval for the MEXC websocket. The documentation
 	// specifies that this should be done every 30 seconds, however, the actual threshold should be
@@ -25,7 +25,7 @@ const (
 	// per connection.
 	//
 	// ref: https://mexcdevelop.github.io/apidocs/spot_v3_en/#websocket-market-streams
-	MaxSubscriptionsPerConnection = 20
+	MaxSubscriptionsPerConnection = 30
 )
 
 // DefaultWebSocketConfig is the default configuration for the MEXC Websocket.
