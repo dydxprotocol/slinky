@@ -28,12 +28,12 @@ func GetChainConfig() types.ChainConfig {
 		NumNodes:      2,
 		BinaryName:    "slinkyd",
 		Image: provider.ImageDefinition{
-			Image: "dydxprotocol/slinky-e2e",
+			Image: "ghcr.io/dydxprotocol/slinky-sim-app",
 			UID:   "1000",
 			GID:   "1000",
 		},
 		SidecarImage: provider.ImageDefinition{
-			Image: "dydxprotocol/slinky-e2e-oracle",
+			Image: "ghcr.io/dydxprotocol/slinky-e2e-sidecar",
 			UID:   "1000",
 			GID:   "1000",
 		},

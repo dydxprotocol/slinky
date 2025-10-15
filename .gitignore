@@ -38,3 +38,8 @@ run.go
 
 *.log*
 oracle.json
+
+.buildx-cache
+build*
+*.tgz
+*.tar.gz

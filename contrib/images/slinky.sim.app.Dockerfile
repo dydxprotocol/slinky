@@ -17,14 +17,14 @@ RUN --mount=type=cache,target=${GOMODCACHE} \
 COPY . .
 RUN --mount=type=cache,target=${GOMODCACHE} \
     --mount=type=cache,target=${GOCACHE} \
-    make build
+    make build-sim-app
 
+## Prepare the final clear binary
+## This will expose the tendermint and cosmos ports alongside
+## starting up the sim app and the slinky daemon
 FROM ubuntu:rolling
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends jq ca-certificates make git curl bash dasel \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install jq ca-certificates -y
 COPY --from=builder /src/slinky/build/* /usr/local/bin/
 
-WORKDIR /usr/local/bin/
-EXPOSE 8080 8002
-ENTRYPOINT [ "slinky" ]
+EXPOSE 26656 26657 1317 9090 7171 26655 8081 26660
+ENTRYPOINT ["slinkyd", "start"]

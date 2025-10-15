@@ -19,12 +19,10 @@ RUN --mount=type=cache,target=${GOMODCACHE} \
     --mount=type=cache,target=${GOCACHE} \
     make build
 
-FROM ubuntu:rolling
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends jq ca-certificates make git curl bash dasel \
-    && rm -rf /var/lib/apt/lists/*
+FROM gcr.io/distroless/base-debian12:debug
+EXPOSE 8080 8002
+
 COPY --from=builder /src/slinky/build/* /usr/local/bin/
 
 WORKDIR /usr/local/bin/
-EXPOSE 8080 8002
 ENTRYPOINT [ "slinky" ]

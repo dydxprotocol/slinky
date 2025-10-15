@@ -75,7 +75,7 @@ stop-sidecar-dev:
 	@$(DOCKER_COMPOSE) -f $(DEV_COMPOSE) --profile sidecar down
 
 install: tidy
-	@go install -ldflags="$(BUILD_TAGS)" -mod=readonly ./cmd/slinky
+	@go install -ldflags="$(BUILD_TAGS)" ./cmd/slinky
 
 .PHONY: build install run-oracle-client start-all-dev stop-all-dev
 
@@ -84,11 +84,33 @@ install: tidy
 ###############################################################################
 
 docker-build:
-	@echo "Building E2E Docker image..."
-	@DOCKER_BUILDKIT=1 $(DOCKER) build -t dydxprotocol/slinky-e2e -f contrib/images/slinky.e2e.Dockerfile .
-	@DOCKER_BUILDKIT=1 $(DOCKER) build -t dydxprotocol/slinky-e2e-oracle -f contrib/images/slinky.sidecar.dev.Dockerfile .
+	@echo "Building Docker images..."
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-base             -f contrib/images/slinky.base.Dockerfile .         	   --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-e2e-sidecar      -f contrib/images/slinky.sidecar.e2e.Dockerfile .      --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-local-app        -f contrib/images/slinky.local.Dockerfile .      	   --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-market-simulator -f contrib/images/slinky.market.simulator.Dockerfile . --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sidecar          -f contrib/images/slinky.sidecar.Dockerfile .      	   --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sidecar-dev      -f contrib/images/slinky.sidecar.dev.Dockerfile .      --platform linux/amd64,linux/arm64
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sim-app          -f contrib/images/slinky.sim.app.Dockerfile .     	   --platform linux/amd64,linux/arm64
 
-.PHONY: docker-build
+docker-push:
+	@echo "Pushing Docker images..."
+	docker push ghcr.io/dydxprotocol/slinky-base
+	docker push ghcr.io/dydxprotocol/slinky-e2e-sidecar
+	docker push ghcr.io/dydxprotocol/slinky-local-app
+	docker push ghcr.io/dydxprotocol/slinky-market-simulator
+	docker push ghcr.io/dydxprotocol/slinky-sidecar
+	docker push ghcr.io/dydxprotocol/slinky-sidecar-dev
+	docker push ghcr.io/dydxprotocol/slinky-sim-app
+
+e2e-docker-build:
+	@echo "Building Docker images..."
+	# don't build for multiple platforms - build in native arch for e2e test runner
+	# load to cache to provide local image for e2e test runner
+	docker buildx build --load --cache-from=type=local,src=.buildx-cache,scope=slinky-sim-app --cache-to=type=local,dest=.buildx-cache,mode=max,compression=zstd,scope=slinky-sim-app -t ghcr.io/dydxprotocol/slinky-sim-app     -f contrib/images/slinky.sim.app.Dockerfile .
+	docker buildx build --load --cache-from=type=local,src=.buildx-cache,scope=slinky-e2e-sidecar --cache-to=type=local,dest=.buildx-cache,mode=max,compression=zstd,scope=slinky-e2e-sidecar -t ghcr.io/dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .
+
+.PHONY: docker-build e2e-docker-build
 
 ###############################################################################
 ###                                Test App                                 ###
@@ -140,9 +162,9 @@ ifeq (,$(findstring nostrip,$(COSMOS_BUILD_OPTIONS)))
   BUILD_FLAGS += -trimpath
 endif
 
-BUILD_TARGETS := build-test-app
+BUILD_TARGETS := build-sim-app
 
-build-test-app: BUILD_ARGS=-o $(BUILD_DIR)/
+build-sim-app: BUILD_ARGS=-o $(BUILD_DIR)/
 
 $(BUILD_TARGETS): $(BUILD_DIR)/
 	@cd $(CURDIR)/tests/simapp && go build -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
@@ -178,17 +200,17 @@ start-app:
 # This will allow users to bootstrap their wallet with a balance.
 build-and-start-app: build-configs start-app
 
-.PHONY: build-test-app build-configs build-and-start-app start-app delete-configs
+.PHONY: build-sim-app build-configs build-and-start-app start-app delete-configs
 
 ###############################################################################
 ###                               Testing                                   ###
 ###############################################################################
 
-test-integration: tidy docker-build
+test-integration: tidy e2e-docker-build
 	@echo "Running integration tests..."
 	@cd ./tests/integration &&  go test -p 1 -v -race -timeout 30m
 
-test-petri-integ: tidy docker-build
+test-petri-integ: tidy e2e-docker-build
 	@echo "Running petri integration tests..."
 	@cd ./tests/petri &&  go test -p 1 -v -race -timeout 30m
 
