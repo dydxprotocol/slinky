@@ -25,11 +25,11 @@ jobs:
           go-version-file: .go-version
           check-latest: false
 
-      - name: Lint code
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          only-new-issues: true
+      - name: Install golangci-lint from source
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+      - name: Run golangci-lint
+        run: golangci-lint run --timeout=5m --out-format=colored-line-number
 
   govulncheck:
     name: Vulnerability Scan
