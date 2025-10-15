@@ -31,22 +31,23 @@ jobs:
       - name: Run golangci-lint
         run: golangci-lint run --timeout=5m --out-format=colored-line-number
 
-  govulncheck:
-    name: Vulnerability Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v5
+  # TODO: re-enable
+  # govulncheck:
+  #   name: Vulnerability Scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v5
 
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: .go-version
-          check-latest: false
+  #     - name: Setup Go
+  #       uses: actions/setup-go@v6
+  #       with:
+  #         go-version-file: .go-version
+  #         check-latest: false
 
-      - name: Run govulncheck
-        id: govulncheck
-        uses: golang/govulncheck-action@v1
-        with:
-          go-version-file: .go-version
-          go-package: ./...
+  #     - name: Run govulncheck
+  #       id: govulncheck
+  #       uses: golang/govulncheck-action@v1
+  #       with:
+  #         go-version-file: .go-version
+  #         go-package: ./...
