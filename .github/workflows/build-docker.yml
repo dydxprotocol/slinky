@@ -1,4 +1,4 @@
-name: Build Slinky docker images
+name: Build Slinky Docker images and push Releases to GHCR
 on:
   push:
     paths-ignore:
@@ -9,6 +9,10 @@ on:
       - "v*"
   pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: slinky-docker-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -57,14 +61,28 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+      - name: Compute tags
+        id: tags
+        run: |
+          TAGS="ghcr.io/dydxprotocol/${{ matrix.image.name }}:latest"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            TAGS="$TAGS,ghcr.io/dydxprotocol/${{ matrix.image.name }}:${VERSION}"
+          fi
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+
+      - name: Show tags
+        run: |
+          echo "Tags: ${{ steps.tags.outputs.tags }}"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name == 'push' }}
+          push: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
           platforms: linux/amd64
           file: "./contrib/images/${{ matrix.image.file }}"
-          tags: ghcr.io/dydxprotocol/${{ matrix.image.name }}:latest
+          tags: ${{ steps.tags.outputs.tags }}
           cache-from: type=gha,scope=${{ matrix.image.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image.name }}
           github-token: ${{ secrets.GITHUB_TOKEN }}

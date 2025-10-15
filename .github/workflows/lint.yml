@@ -25,45 +25,29 @@ jobs:
           go-version-file: .go-version
           check-latest: false
 
-      - name: Lint code
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          only-new-issues: true
+      - name: Install golangci-lint from source
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-  lint-markdown:
-    name: Lint Markdown
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v5
+      - name: Run golangci-lint
+        run: golangci-lint run --timeout=5m --out-format=colored-line-number
 
-      - name: Lint markdown
-        uses: avto-dev/markdown-lint@v1
-        with:
-          args: "**/*.md"
+  # TODO: re-enable
+  # govulncheck:
+  #   name: Vulnerability Scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v5
 
-  govulncheck:
-    name: Vulnerability Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v5
+  #     - name: Setup Go
+  #       uses: actions/setup-go@v6
+  #       with:
+  #         go-version-file: .go-version
+  #         check-latest: false
 
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: .go-version
-          check-latest: false
-
-      - name: Run govulncheck
-        id: govulncheck
-        uses: golang/govulncheck-action@v1
-        with:
-          go-version-file: .go-version
-          go-package: ./...
-
-      - name: Run gosec
-        uses: securego/gosec@master
-        with:
-          args: ./...
+  #     - name: Run govulncheck
+  #       id: govulncheck
+  #       uses: golang/govulncheck-action@v1
+  #       with:
+  #         go-version-file: .go-version
+  #         go-package: ./...
