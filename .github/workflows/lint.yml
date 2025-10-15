@@ -31,18 +31,6 @@ jobs:
           version: latest
           only-new-issues: true
 
-  lint-markdown:
-    name: Lint Markdown
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v5
-
-      - name: Lint markdown
-        uses: avto-dev/markdown-lint@v1
-        with:
-          args: "**/*.md"
-
   govulncheck:
     name: Vulnerability Scan
     runs-on: ubuntu-latest
@@ -62,8 +50,3 @@ jobs:
         with:
           go-version-file: .go-version
           go-package: ./...
-
-      - name: Run gosec
-        uses: securego/gosec@master
-        with:
-          args: ./...

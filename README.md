@@ -1,28 +1,10 @@
 # slinky
 
-<!-- markdownlint-disable MD013 -->
-<!-- markdownlint-disable MD041 -->
-
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#wip)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://godoc.org/github.com/dydxprotocol/slinky)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dydxprotocol/slinky?style=flat-square)](https://goreportcard.com/report/github.com/dydxprotocol/slinky)
 [![Version](https://img.shields.io/github/tag/dydxprotocol/slinky.svg?style=flat-square)](https://github.com/dydxprotocol/slinky/releases/latest)
 [![Lines Of Code](https://img.shields.io/tokei/lines/github/dydxprotocol/slinky?style=flat-square)](https://github.com/dydxprotocol/slinky)
-
-A general purpose price oracle leveraging ABCI++. Please visit our [docs](https://docs.skip.build/connect/introduction) page for more information!
-
-Slinky uses Vote Extensions to create an hyperperformant, extremely secure mechanism for aggregating off-chain data onto a blockchain. It is used by
-many of the highest-performance decentralized applications today. If you would like to integrate Slinky to power your use case, please contact us on our
-[Discord](https://discord.gg/PeBGE9jrbu).
-
-> [!NOTE]
-> Slinky is **business-licensed software** under BSL, meaning it requires a license to use or reference. It is source viewable, but [**reach out to us on Discord**](https://skip.build/discord) if you are interested in integrating! We are limiting the number of chains we work with to seven in 2024. We apologize if we run out of capacity.
-
-## Install
-
-```shell
-$ go install github.com/dydxprotocol/slinky
-```
 
 ## Overview
 
@@ -34,6 +16,13 @@ The slinky repository is composed of the following core packages:
 * **x/oracle** - This package contains a Cosmos SDK module that allows you to store oracle data on a blockchain.
 * **x/marketmap** - This [package](./x/marketmap/README.md) contains  a Cosmos SDK module that allows for market configuration to be stored and updated on a blockchain.
 
+## Installation
+
+```bash
+git clone https://github.com/dydxprotocol/slinky.git
+cd slinky/cmd/slinky
+go install .
+```
 ## Validator Usage
 
 To read how to run the oracle as a validator based on the chain, please reference the [validator documentation](https://docs.skip.build/connect/validators/quickstart).
@@ -104,7 +93,3 @@ We have an extensive suite of metrics available to validators and chain operator
 * Skip renamed their repo (and code refs) from Slinky --> Connect for branding purposes.
 * Unfortunately it is impossible to update V4 protocol to use the renamed version, as message names etc. were changed. This would cause downtime during the interval when validators have updated `v4-chain` to use the rename but have not yet updated sidecar (or vice-versa).
 * As a result, the dYdX fork of `skip-mev/connect` has chosen to roll back to the pre-rename state, `slinky`, as the base for future development (along with backporting any essential post-rename changes to functionality).
-
-### Publishing a Release
-
-To publish a new release of the `dydxprotocol/slinky` codebase, [follow the official Go docs for Publishing A Module.](https://go.dev/doc/modules/publishing)
