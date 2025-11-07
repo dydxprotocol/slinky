@@ -70,7 +70,7 @@ func (h APIHandler) CreateURL(ids []types.ProviderTicker) (string, error) {
 }
 
 type PriceResponse struct {
-	Price *float64 `json:"price"`
+	Mid *float64 `json:"mid"`
 }
 
 // ParseResponse parses the HTTP response from the markets endpoint of the Polymarket API endpoint and returns
@@ -84,11 +84,11 @@ func (h APIHandler) ParseResponse(ids []types.ProviderTicker, response *http.Res
 		return priceResponseError(ids, fmt.Errorf("failed to decode price response"), providertypes.ErrorFailedToDecode)
 	}
 
-	if result.Price == nil {
+	if result.Mid == nil {
 		return priceResponseError(ids, fmt.Errorf("unable to get price from response"), providertypes.ErrorFailedToDecode)
 	}
 
-	price := new(big.Float).SetFloat64(*result.Price)
+	price := new(big.Float).SetFloat64(*result.Mid)
 
 	// switch price to priceAdjustmentMin if its 0.00.
 	if big.NewFloat(0.00).Cmp(price) == 0 {

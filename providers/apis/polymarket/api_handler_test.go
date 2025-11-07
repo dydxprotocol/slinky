@@ -130,22 +130,22 @@ func TestParseResponse(t *testing.T) {
 		expectedPrice *big.Float
 	}{
 		"happy path": {
-			data:          `{"price":1}`,
+			data:          `{"mid":1}`,
 			ticker:        []types.ProviderTicker{btcAbove100k},
 			expectedPrice: big.NewFloat(1.00),
 		},
 		"zero resolution": {
-			data:          `{"price": 0}`,
+			data:          `{"mid": 0}`,
 			ticker:        []types.ProviderTicker{btcAbove100k},
 			expectedPrice: big.NewFloat(priceAdjustmentMin),
 		},
 		"other values work": {
-			data:          `{"price": 0.325}`,
+			data:          `{"mid": 0.325}`,
 			ticker:        []types.ProviderTicker{btcAbove100k},
 			expectedPrice: big.NewFloat(0.325),
 		},
 		"bad response data": {
-			data:        `[{"price": 0.325}]}]`,
+			data:        `[{"mid": 0.325}]}]`,
 			ticker:      []types.ProviderTicker{btcAbove100k},
 			expectedErr: "failed to decode price response",
 		},
@@ -155,7 +155,7 @@ func TestParseResponse(t *testing.T) {
 			expectedErr: "unable to get price from response",
 		},
 		"too many tickers": {
-			data:        `{"price": 0.325}`,
+			data:        `{"mid": 0.325}`,
 			ticker:      []types.ProviderTicker{btcAbove100k, btcAbove100k},
 			expectedErr: "expected 1 ticker, got 2",
 		},
