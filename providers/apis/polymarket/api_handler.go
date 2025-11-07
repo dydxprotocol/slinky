@@ -18,7 +18,7 @@ const (
 	Name = "polymarket_api"
 
 	// URL is the default base URL of the Polymarket CLOB API. It uses the `markets` endpoint with a given market ID.
-	URL = "https://clob.polymarket.com/markets/%s"
+	URL = "https://clob.polymarket.com/midpoint?token_id=%s"
 
 	// priceAdjustmentMin is the value the price gets set to in the event of price == 0.
 	priceAdjustmentMin = 0.0001
@@ -62,56 +62,15 @@ func (h APIHandler) CreateURL(ids []types.ProviderTicker) (string, error) {
 	if len(ids) != 1 {
 		return "", fmt.Errorf("expected 1 ticker, got %d", len(ids))
 	}
-	marketID, _, err := getMarketAndTokenFromTicker(ids[0])
+	_, tokenID, err := getMarketAndTokenFromTicker(ids[0])
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf(h.api.Endpoints[0].URL, marketID), nil
+	return fmt.Sprintf(h.api.Endpoints[0].URL, tokenID), nil
 }
 
-type TokenData struct {
-	TokenID string  `json:"token_id"`
-	Outcome string  `json:"outcome"`
-	Price   float64 `json:"price"`
-}
-
-type MarketsResponse struct {
-	EnableOrderBook         bool      `json:"enable_order_book"`
-	Active                  bool      `json:"active"`
-	Closed                  bool      `json:"closed"`
-	Archived                bool      `json:"archived"`
-	AcceptingOrders         bool      `json:"accepting_orders"`
-	AcceptingOrderTimestamp time.Time `json:"accepting_order_timestamp"`
-	MinimumOrderSize        int       `json:"minimum_order_size"`
-	MinimumTickSize         float64   `json:"minimum_tick_size"`
-	ConditionID             string    `json:"condition_id"`
-	QuestionID              string    `json:"question_id"`
-	Question                string    `json:"question"`
-	Description             string    `json:"description"`
-	MarketSlug              string    `json:"market_slug"`
-	EndDateIso              time.Time `json:"end_date_iso"`
-	GameStartTime           any       `json:"game_start_time"`
-	SecondsDelay            int       `json:"seconds_delay"`
-	Fpmm                    string    `json:"fpmm"`
-	MakerBaseFee            int       `json:"maker_base_fee"`
-	TakerBaseFee            int       `json:"taker_base_fee"`
-	NotificationsEnabled    bool      `json:"notifications_enabled"`
-	NegRisk                 bool      `json:"neg_risk"`
-	NegRiskMarketID         string    `json:"neg_risk_market_id"`
-	NegRiskRequestID        string    `json:"neg_risk_request_id"`
-	Icon                    string    `json:"icon"`
-	Image                   string    `json:"image"`
-	Rewards                 struct {
-		Rates []struct {
-			AssetAddress     string `json:"asset_address"`
-			RewardsDailyRate int    `json:"rewards_daily_rate"`
-		} `json:"rates"`
-		MinSize   int     `json:"min_size"`
-		MaxSpread float64 `json:"max_spread"`
-	} `json:"rewards"`
-	Is5050Outcome bool        `json:"is_50_50_outcome"`
-	Tokens        []TokenData `json:"tokens"`
-	Tags          []string    `json:"tags"`
+type PriceResponse struct {
+	Price *float64 `json:"price"`
 }
 
 // ParseResponse parses the HTTP response from the markets endpoint of the Polymarket API endpoint and returns
@@ -120,30 +79,16 @@ func (h APIHandler) ParseResponse(ids []types.ProviderTicker, response *http.Res
 	if len(ids) != 1 {
 		return priceResponseError(ids, fmt.Errorf("expected 1 ticker, got %d", len(ids)), providertypes.ErrorInvalidResponse)
 	}
-
-	var result MarketsResponse
+	var result PriceResponse
 	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
-		return priceResponseError(ids, fmt.Errorf("failed to decode market response: %w", err), providertypes.ErrorFailedToDecode)
+		return priceResponseError(ids, fmt.Errorf("failed to decode price response"), providertypes.ErrorFailedToDecode)
 	}
 
-	_, tokenID, err := getMarketAndTokenFromTicker(ids[0])
-	if err != nil {
-		return priceResponseError(ids, err, providertypes.ErrorAPIGeneral)
+	if result.Price == nil {
+		return priceResponseError(ids, fmt.Errorf("unable to get price from response"), providertypes.ErrorFailedToDecode)
 	}
 
-	var tokenData *TokenData
-	for _, token := range result.Tokens {
-		if token.TokenID == tokenID {
-			tokenData = &token
-			break
-		}
-	}
-
-	if tokenData == nil {
-		return priceResponseError(ids, fmt.Errorf("token ID %s not found in response", tokenID), providertypes.ErrorInvalidResponse)
-	}
-
-	price := new(big.Float).SetFloat64(tokenData.Price)
+	price := new(big.Float).SetFloat64(*result.Price)
 
 	// switch price to priceAdjustmentMin if its 0.00.
 	if big.NewFloat(0.00).Cmp(price) == 0 {
