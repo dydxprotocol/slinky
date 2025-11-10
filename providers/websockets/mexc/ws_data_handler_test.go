@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/dydxprotocol/slinky/providers/base/websocket/handlers"
 	providertypes "github.com/dydxprotocol/slinky/providers/types"
 	"github.com/dydxprotocol/slinky/providers/websockets/mexc"
+	"github.com/dydxprotocol/slinky/providers/websockets/mexc/pb"
 )
 
 var (
@@ -27,6 +29,19 @@ var (
 	}
 	logger = zap.NewExample()
 )
+
+func getPriceFactory(t *testing.T, ticker string, price string) func() []byte {
+	t.Helper()
+	return func() []byte {
+		px := pb.PublicMiniTickerV3Api{
+			Symbol: ticker,
+			Price:  price,
+		}
+		bz, err := proto.Marshal(&px)
+		require.NoError(t, err)
+		return bz
+	}
+}
 
 func TestHandleMessage(t *testing.T) {
 	testCases := []struct {
@@ -50,7 +65,7 @@ func TestHandleMessage(t *testing.T) {
 		{
 			name: "subscription message",
 			msg: func() []byte {
-				return []byte(`{"id":0,"code":0,"msg":"spot@public.miniTicker.v3.api@BTCUSDT@UTC+8"}`)
+				return []byte(`{"id":0,"code":0,"msg":"spot@public.miniTicker.v3.api.pb@BTCUSDT@UTC+8"}`)
 			},
 			resp: types.PriceResponse{},
 			updateMessage: func() []handlers.WebsocketEncodedMessage {
@@ -71,14 +86,11 @@ func TestHandleMessage(t *testing.T) {
 		},
 		{
 			name: "price update message",
-			msg: func() []byte {
-				msg := `{"c":"spot@public.miniTicker.v3.api@BTCUSDT@UTC+8","d":{"s":"BTCUSDT","p":"10000.00"}}`
-				return []byte(msg)
-			},
+			msg:  getPriceFactory(t, "BTCUSDT", "100000.00"),
 			resp: types.PriceResponse{
 				Resolved: types.ResolvedPrices{
 					btcusdt: {
-						Value: big.NewFloat(10000.00),
+						Value: big.NewFloat(100000.00),
 					},
 				},
 			},
@@ -89,10 +101,7 @@ func TestHandleMessage(t *testing.T) {
 		},
 		{
 			name: "unsupported market price update",
-			msg: func() []byte {
-				msg := `{"c":"spot@public.miniTicker.v3.api@MOGUSDT@UTC+8","d":{"s":"MOGUSDT","p":"10000.00"}}`
-				return []byte(msg)
-			},
+			msg:  getPriceFactory(t, "MOGUSDT", "100000.00"),
 			resp: types.PriceResponse{},
 			updateMessage: func() []handlers.WebsocketEncodedMessage {
 				return nil
@@ -100,29 +109,8 @@ func TestHandleMessage(t *testing.T) {
 			expErr: true,
 		},
 		{
-			name: "price update from incorrect channel",
-			msg: func() []byte {
-				msg := `{"c":"futures@public.miniTicker.v3.api@BTCUSDT@UTC+8","d":{"s":"BTCUSDT","p":"10000.00"}}`
-				return []byte(msg)
-			},
-			resp: types.PriceResponse{
-				UnResolved: types.UnResolvedPrices{
-					btcusdt: providertypes.UnresolvedResult{
-						ErrorWithCode: providertypes.NewErrorWithCode(fmt.Errorf("invalid channel"), providertypes.ErrorWebSocketGeneral),
-					},
-				},
-			},
-			updateMessage: func() []handlers.WebsocketEncodedMessage {
-				return nil
-			},
-			expErr: true,
-		},
-		{
 			name: "price update with invalid price",
-			msg: func() []byte {
-				msg := `{"c":"spot@public.miniTicker.v3.api@BTCUSDT@UTC+8","d":{"s":"BTCUSDT","p":"$10,000.00"}}`
-				return []byte(msg)
-			},
+			msg:  getPriceFactory(t, "BTCUSDT", "$10,000.00"),
 			resp: types.PriceResponse{
 				UnResolved: types.UnResolvedPrices{
 					btcusdt: providertypes.UnresolvedResult{
@@ -194,7 +182,7 @@ func TestCreateMessages(t *testing.T) {
 			},
 			cfg: mexc.DefaultWebSocketConfig,
 			expected: func() []handlers.WebsocketEncodedMessage {
-				msg := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api@BTCUSDT@UTC+8"]}`
+				msg := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api.pb@BTCUSDT@UTC+8"]}`
 				return []handlers.WebsocketEncodedMessage{[]byte(msg)}
 			},
 			expectedErr: false,
@@ -208,9 +196,9 @@ func TestCreateMessages(t *testing.T) {
 			},
 			cfg: mexc.DefaultWebSocketConfig,
 			expected: func() []handlers.WebsocketEncodedMessage {
-				msg1 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api@BTCUSDT@UTC+8"]}`
-				msg2 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api@ETHUSDT@UTC+8"]}`
-				msg3 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api@ATOMUSDC@UTC+8"]}`
+				msg1 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api.pb@BTCUSDT@UTC+8"]}`
+				msg2 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api.pb@ETHUSDT@UTC+8"]}`
+				msg3 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api.pb@ATOMUSDC@UTC+8"]}`
 				return []handlers.WebsocketEncodedMessage{[]byte(msg1), []byte(msg2), []byte(msg3)}
 			},
 			expectedErr: false,
@@ -223,7 +211,7 @@ func TestCreateMessages(t *testing.T) {
 			},
 			cfg: batchCfg,
 			expected: func() []handlers.WebsocketEncodedMessage {
-				msg1 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api@BTCUSDT@UTC+8","spot@public.miniTicker.v3.api@ETHUSDT@UTC+8"]}`
+				msg1 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api.pb@BTCUSDT@UTC+8","spot@public.miniTicker.v3.api.pb@ETHUSDT@UTC+8"]}`
 				return []handlers.WebsocketEncodedMessage{[]byte(msg1)}
 			},
 			expectedErr: false,
@@ -237,8 +225,8 @@ func TestCreateMessages(t *testing.T) {
 			},
 			cfg: batchCfg,
 			expected: func() []handlers.WebsocketEncodedMessage {
-				msg1 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api@BTCUSDT@UTC+8","spot@public.miniTicker.v3.api@ETHUSDT@UTC+8"]}`
-				msg2 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api@ATOMUSDC@UTC+8"]}`
+				msg1 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api.pb@BTCUSDT@UTC+8","spot@public.miniTicker.v3.api.pb@ETHUSDT@UTC+8"]}`
+				msg2 := `{"method":"SUBSCRIPTION","params":["spot@public.miniTicker.v3.api.pb@ATOMUSDC@UTC+8"]}`
 				return []handlers.WebsocketEncodedMessage{[]byte(msg1), []byte(msg2)}
 			},
 			expectedErr: false,

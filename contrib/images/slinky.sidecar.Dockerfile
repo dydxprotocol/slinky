@@ -4,6 +4,7 @@ LABEL org.opencontainers.image.source="https://github.com/dydxprotocol/slinky"
 WORKDIR /src/slinky
 ENV GOCACHE=/root/.cache/go-build
 ENV GOMODCACHE=/go/pkg/mod
+ENV GOTOOLCHAIN=auto
 
 RUN --mount=type=cache,target=${GOMODCACHE} \
     --mount=type=cache,target=${GOCACHE} \
