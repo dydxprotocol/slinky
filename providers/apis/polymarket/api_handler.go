@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/dydxprotocol/slinky/oracle/config"
@@ -62,11 +61,7 @@ func (h APIHandler) CreateURL(ids []types.ProviderTicker) (string, error) {
 	if len(ids) != 1 {
 		return "", fmt.Errorf("expected 1 ticker, got %d", len(ids))
 	}
-	_, tokenID, err := getMarketAndTokenFromTicker(ids[0])
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf(h.api.Endpoints[0].URL, tokenID), nil
+	return fmt.Sprintf(h.api.Endpoints[0].URL, ids[0]), nil
 }
 
 type PriceResponse struct {
@@ -107,12 +102,4 @@ func priceResponseError(ids []types.ProviderTicker, err error, code providertype
 		ids,
 		providertypes.NewErrorWithCode(err, code),
 	)
-}
-
-func getMarketAndTokenFromTicker(t types.ProviderTicker) (marketID string, tokenID string, err error) {
-	split := strings.Split(t.GetOffChainTicker(), "/")
-	if len(split) != 2 {
-		return "", "", fmt.Errorf("expected ticker format market_id/token_id, got: %s", t.GetOffChainTicker())
-	}
-	return split[0], split[1], nil
 }
