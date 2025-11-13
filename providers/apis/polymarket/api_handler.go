@@ -70,7 +70,7 @@ func (h APIHandler) CreateURL(ids []types.ProviderTicker) (string, error) {
 }
 
 type PriceResponse struct {
-	Mid *float64 `json:"mid"`
+	Mid *float64 `json:"mid,string"`
 }
 
 // ParseResponse parses the HTTP response from the markets endpoint of the Polymarket API endpoint and returns
