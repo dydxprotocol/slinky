@@ -14,8 +14,8 @@ import (
 	"github.com/dydxprotocol/slinky/oracle/types"
 )
 
-var candidateWinsElectionToken = types.DefaultProviderTicker{
-	OffChainTicker: "0xc6485bb7ea46d7bb89beb9c91e7572ecfc72a6273789496f78bc5e989e4d1638/95128817762909535143571435260705470642391662537976312011260538371392879420759",
+var btcAbove100k = types.DefaultProviderTicker{
+	OffChainTicker: "109316475563207680750454013262168290636995541053876975584833586297692429518773",
 }
 
 func TestNewAPIHandler(t *testing.T) {
@@ -92,17 +92,17 @@ func TestCreateURL(t *testing.T) {
 		{
 			name: "too many",
 			pts: []types.ProviderTicker{
-				candidateWinsElectionToken,
-				candidateWinsElectionToken,
+				btcAbove100k,
+				btcAbove100k,
 			},
 			expErr: "expected 1 ticker, got 2",
 		},
 		{
 			name: "happy case",
 			pts: []types.ProviderTicker{
-				candidateWinsElectionToken,
+				btcAbove100k,
 			},
-			expectedURL: fmt.Sprintf(URL, "0xc6485bb7ea46d7bb89beb9c91e7572ecfc72a6273789496f78bc5e989e4d1638"),
+			expectedURL: fmt.Sprintf(URL, "109316475563207680750454013262168290636995541053876975584833586297692429518773"),
 		},
 	}
 	h, err := NewAPIHandler(DefaultAPIConfig)
@@ -130,48 +130,33 @@ func TestParseResponse(t *testing.T) {
 		expectedPrice *big.Float
 	}{
 		"happy path": {
-			data: `{"tokens": [{
-          "token_id": "95128817762909535143571435260705470642391662537976312011260538371392879420759",
-          "outcome": "Yes",
-          "price": 1}]}]}`,
-			ticker:        []types.ProviderTicker{candidateWinsElectionToken},
+			data:          `{"mid": "1"}`,
+			ticker:        []types.ProviderTicker{btcAbove100k},
 			expectedPrice: big.NewFloat(1.00),
 		},
 		"zero resolution": {
-			data: `{"tokens": [{
-          "token_id": "95128817762909535143571435260705470642391662537976312011260538371392879420759",
-          "outcome": "Yes",
-          "price": 0}]}]}`,
-			ticker:        []types.ProviderTicker{candidateWinsElectionToken},
+			data:          `{"mid": "0"}`,
+			ticker:        []types.ProviderTicker{btcAbove100k},
 			expectedPrice: big.NewFloat(priceAdjustmentMin),
 		},
 		"other values work": {
-			data: `{"tokens": [{
-          "token_id": "95128817762909535143571435260705470642391662537976312011260538371392879420759",
-          "outcome": "Yes",
-          "price": 0.325}]}]}`,
-			ticker:        []types.ProviderTicker{candidateWinsElectionToken},
+			data:          `{"mid": "0.325"}`,
+			ticker:        []types.ProviderTicker{btcAbove100k},
 			expectedPrice: big.NewFloat(0.325),
 		},
-		"token not in response": {
-			data: `{"tokens": [{
-          "token_id": "35128817762909535143571435260705470642391662537976312011260538371392879420759",
-          "outcome": "Yes",
-          "price": 0.325}]}]}`,
-			ticker:      []types.ProviderTicker{candidateWinsElectionToken},
-			expectedErr: "token ID 95128817762909535143571435260705470642391662537976312011260538371392879420759 not found in response",
-		},
 		"bad response data": {
-			data: `{"tokens": [{
-          "token_id":z,
-          "outcome": "Yes",
-          "price": 0.325}]}]}`,
-			ticker:      []types.ProviderTicker{candidateWinsElectionToken},
-			expectedErr: "failed to decode market response",
+			data:        `[{"mid": "0.325"}]}]`,
+			ticker:      []types.ProviderTicker{btcAbove100k},
+			expectedErr: "failed to decode price response",
+		},
+		"missing price data": {
+			data:        `{"not_price": "0.332"}`,
+			ticker:      []types.ProviderTicker{btcAbove100k},
+			expectedErr: "unable to get price from response",
 		},
 		"too many tickers": {
-			data:        `{"tokens": []}`,
-			ticker:      []types.ProviderTicker{candidateWinsElectionToken, candidateWinsElectionToken},
+			data:        `{"mid": "0.325"}`,
+			ticker:      []types.ProviderTicker{btcAbove100k, btcAbove100k},
 			expectedErr: "expected 1 ticker, got 2",
 		},
 	}

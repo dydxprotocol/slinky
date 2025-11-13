@@ -9718,6 +9718,40 @@ var (
 	PolymarketMarketMapJSON = ` 
 {
    "markets":{
+      "ARSENAL_WIN_PREMIER_LEAGUE/USD":{
+         "ticker":{
+            "currency_pair":{
+               "Base":"ARSENAL_WIN_PREMIER_LEAGUE",
+               "Quote":"USD"
+            },
+            "decimals":4,
+            "min_provider_count":1,
+            "enabled":true
+         },
+         "provider_configs":[
+            {
+               "name":"polymarket_api",
+               "off_chain_ticker":"71634047218945647363395171891674404459556716906851450020664198669471161667814"
+            }
+         ]
+      },
+      "BTC_ABOVE_100K/USD":{
+         "ticker":{
+            "currency_pair":{
+               "Base":"BTC_ABOVE_100K",
+               "Quote":"USD"
+            },
+            "decimals":4,
+            "min_provider_count":1,
+            "enabled":true
+         },
+         "provider_configs":[
+            {
+               "name":"polymarket_api",
+               "off_chain_ticker":"70589272990567584699583734524973289598058001943159544537175680785792668210572"
+            }
+         ]
+      },
       "WILL_BERNIE_SANDERS_WIN_THE_2024_US_PRESIDENTIAL_ELECTION?YES/USD":{
          "ticker":{
             "currency_pair":{
@@ -9731,7 +9765,7 @@ var (
          "provider_configs":[
             {
                "name":"polymarket_api",
-               "off_chain_ticker":"0x08f5fe8d0d29c08a96f0bc3dfb52f50e0caf470d94d133d95d38fa6c847e0925/95128817762909535143571435260705470642391662537976312011260538371392879420759"
+               "off_chain_ticker":"95128817762909535143571435260705470642391662537976312011260538371392879420759"
             }
          ]
       },
@@ -9748,7 +9782,7 @@ var (
          "provider_configs":[
             {
                "name":"polymarket_api",
-               "off_chain_ticker":"0x1ab07117f9f698f28490f57754d6fe5309374230c95867a7eba572892a11d710/50107902083284751016545440401692219408556171231461347396738260657226842527986"
+               "off_chain_ticker":"50107902083284751016545440401692219408556171231461347396738260657226842527986"
             }
          ]
       }
