@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cosmos/gogoproto/proto"
 	"go.uber.org/zap"
 
 	"github.com/dydxprotocol/slinky/oracle/config"
 	"github.com/dydxprotocol/slinky/oracle/types"
 	"github.com/dydxprotocol/slinky/providers/base/websocket/handlers"
+	"github.com/dydxprotocol/slinky/providers/websockets/mexc/pb"
 )
 
 var _ types.PriceWebSocketDataHandler = (*WebSocketHandler)(nil)
@@ -60,37 +62,34 @@ func (h *WebSocketHandler) HandleMessage(
 	message []byte,
 ) (types.PriceResponse, []handlers.WebsocketEncodedMessage, error) {
 	var (
-		resp      types.PriceResponse
-		msg       BaseMessage
-		tickerMsg TickerResponseMessage
+		resp types.PriceResponse
+		msg  BaseMessage
 	)
 
-	if err := json.Unmarshal(message, &msg); err != nil {
-		return resp, nil, fmt.Errorf("failed to unmarshal message %w", err)
-	}
-
-	// If the base message is empty, we assume it is a price message.
-	if msg.IsEmpty() {
-		if err := json.Unmarshal(message, &tickerMsg); err != nil {
-			return resp, nil, fmt.Errorf("failed to unmarshal ticker message %w", err)
-		}
-
-		// Parse the ticker message.
-		resp, err := h.parseTickerResponseMessage(tickerMsg)
+	// attempt to unmarshal the message as protobuf miniticker message
+	// most message updates will be protobuf messages
+	px := &pb.PublicMiniTickerV3Api{}
+	if err := proto.Unmarshal(message, px); err == nil {
+		resp, err := h.parseTickerResponseMessage(px)
 		return resp, nil, err
 	}
 
-	// Otherwise, we assume it is a subscription or pong message.
-	switch {
-	case strings.HasPrefix(msg.Message, string(MiniTickerChannel)):
-		h.logger.Debug("subscribed to ticker channel", zap.String("instruments", msg.Message))
-		return resp, nil, nil
-	case MethodType(msg.Message) == PongMethod:
+	// if the message is JSON, it is a subscription or ping response
+	if err := json.Unmarshal(message, &msg); err != nil {
+		return resp, nil, fmt.Errorf("failed to unmarshal JSON message %w", err)
+	}
+
+	if msg.Message == "PONG" {
 		h.logger.Debug("received pong message")
 		return resp, nil, nil
-	default:
-		return resp, nil, fmt.Errorf("invalid message type: %s", msg.Message)
 	}
+
+	if strings.HasPrefix(msg.Message, MiniTickerChannel) {
+		h.logger.Debug("subscribed to ticker channel", zap.String("instruments", msg.Message))
+		return resp, nil, nil
+	}
+
+	return resp, nil, fmt.Errorf("invalid message type: %s", msg.Message)
 }
 
 // CreateMessages is used to create a message to send to the data provider. This is used to
@@ -105,7 +104,7 @@ func (h *WebSocketHandler) CreateMessages(
 
 	instruments := make([]string, 0)
 	for _, ticker := range tickers {
-		mexcTicker := fmt.Sprintf("%s%s%s", string(MiniTickerChannel), strings.ToUpper(ticker.GetOffChainTicker()), "@UTC+8")
+		mexcTicker := fmt.Sprintf("%s%s%s", MiniTickerChannel, strings.ToUpper(ticker.GetOffChainTicker()), "@UTC+8")
 		instruments = append(instruments, mexcTicker)
 		h.cache.Add(ticker)
 	}

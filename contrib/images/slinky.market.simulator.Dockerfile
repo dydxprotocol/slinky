@@ -1,4 +1,4 @@
-FROM golang:1.25.1 AS builder
+FROM golang:1.25.4 AS builder
 LABEL org.opencontainers.image.source="https://github.com/dydxprotocol/slinky"
 
 WORKDIR /src/slinky

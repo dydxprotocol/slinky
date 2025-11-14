@@ -27,9 +27,6 @@ USE_POLYMARKET_MARKETS ?= false
 SCRIPT_DIR := $(CURDIR)/scripts
 DEV_COMPOSE ?= $(CURDIR)/contrib/compose/docker-compose-dev.yml
 
-LEVANT_VAR_FILE:=$(shell mktemp -d)/levant.yaml
-NOMAD_FILE_SLINKY:=contrib/nomad/slinky.nomad
-
 TAG := $(shell git describe --tags --always --dirty)
 
 export HOMEDIR := $(HOMEDIR)
@@ -95,20 +92,20 @@ docker-build:
 
 docker-push:
 	@echo "Pushing Docker images..."
-	docker push ghcr.io/dydxprotocol/slinky-base
-	docker push ghcr.io/dydxprotocol/slinky-e2e-sidecar
-	docker push ghcr.io/dydxprotocol/slinky-local-app
-	docker push ghcr.io/dydxprotocol/slinky-market-simulator
-	docker push ghcr.io/dydxprotocol/slinky-sidecar
-	docker push ghcr.io/dydxprotocol/slinky-sidecar-dev
-	docker push ghcr.io/dydxprotocol/slinky-sim-app
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-base             -f contrib/images/slinky.base.Dockerfile .         	   --platform linux/amd64,linux/arm64 --push
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-e2e-sidecar      -f contrib/images/slinky.sidecar.e2e.Dockerfile .      --platform linux/amd64,linux/arm64 --push
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-local-app        -f contrib/images/slinky.local.Dockerfile .      	   --platform linux/amd64,linux/arm64 --push
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-market-simulator -f contrib/images/slinky.market.simulator.Dockerfile . --platform linux/amd64,linux/arm64 --push
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sidecar          -f contrib/images/slinky.sidecar.Dockerfile .      	   --platform linux/amd64,linux/arm64 --push
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sidecar-dev      -f contrib/images/slinky.sidecar.dev.Dockerfile .      --platform linux/amd64,linux/arm64 --push
+	docker buildx build -t ghcr.io/dydxprotocol/slinky-sim-app          -f contrib/images/slinky.sim.app.Dockerfile .     	   --platform linux/amd64,linux/arm64 --push
 
 e2e-docker-build:
 	@echo "Building Docker images..."
 	# don't build for multiple platforms - build in native arch for e2e test runner
 	# load to cache to provide local image for e2e test runner
-	docker buildx build --load --cache-from=type=local,src=.buildx-cache,scope=slinky-sim-app --cache-to=type=local,dest=.buildx-cache,mode=max,compression=zstd,scope=slinky-sim-app -t ghcr.io/dydxprotocol/slinky-sim-app     -f contrib/images/slinky.sim.app.Dockerfile .
-	docker buildx build --load --cache-from=type=local,src=.buildx-cache,scope=slinky-e2e-sidecar --cache-to=type=local,dest=.buildx-cache,mode=max,compression=zstd,scope=slinky-e2e-sidecar -t ghcr.io/dydxprotocol/slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile .
+	docker buildx build --load --cache-from=type=local,src=.buildx-cache,scope=slinky-sim-app --cache-to=type=local,dest=.buildx-cache,mode=max,compression=zstd,scope=slinky-sim-app -t slinky-sim-app     -f contrib/images/slinky.sim.app.Dockerfile --load .
+	docker buildx build --load --cache-from=type=local,src=.buildx-cache,scope=slinky-e2e-sidecar --cache-to=type=local,dest=.buildx-cache,mode=max,compression=zstd,scope=slinky-e2e-sidecar -t slinky-e2e-sidecar -f contrib/images/slinky.sidecar.e2e.Dockerfile --load .
 
 .PHONY: docker-build e2e-docker-build
 
@@ -235,7 +232,7 @@ test-cover: tidy
 ###                                Protobuf                                 ###
 ###############################################################################
 
-protoVer=0.14.0
+protoVer=0.17.1
 protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
 protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
 
@@ -244,6 +241,10 @@ proto-all: tidy proto-format proto-gen proto-pulsar-gen format
 proto-gen:
 	@echo "Generating Protobuf files"
 	@$(protoImage) sh ./scripts/protocgen.sh
+
+proto-gen-vendors:
+	@echo "Generating Vendor Protobuf files"
+	@$(protoImage) sh ./scripts/protocgen-vendors.sh
 
 proto-pulsar-gen:
 	@echo "Generating Dep-Inj Protobuf files"
@@ -319,18 +320,6 @@ format:
 	@find . -name '*.go' -type f -not -path "*.git*" -not -path "/*mocks/*" -not -name '*.pb.go' -not -name '*.pulsar.go' -not -name '*.gw.go' | xargs go run golang.org/x/tools/cmd/goimports -w -local github.com/dydxprotocol/slinky
 
 .PHONY: format
-
-###############################################################################
-###                                dev-deploy                               ###
-###############################################################################
-
-deploy-dev:
-	@touch ${LEVANT_VAR_FILE}
-	@yq e -i '.sidecar_image |= "${SIDECAR_IMAGE}"' ${LEVANT_VAR_FILE}
-	@yq e -i '.chain_image |= "${CHAIN_IMAGE}"' ${LEVANT_VAR_FILE}
-	@levant deploy -force -force-count -var-file=${LEVANT_VAR_FILE} ${NOMAD_FILE_SLINKY}
-
-.PHONY: deploy-dev
 
 ###############################################################################
 ##                                  Docs                                     ##

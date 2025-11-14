@@ -2,42 +2,30 @@ package mexc
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	providertypes "github.com/dydxprotocol/slinky/providers/types"
 
 	"github.com/dydxprotocol/slinky/oracle/types"
 	"github.com/dydxprotocol/slinky/pkg/math"
+	"github.com/dydxprotocol/slinky/providers/websockets/mexc/pb"
 )
 
-// parseTickerResponseMessage parses a price update received from the MEXC websocket
-// and returns a GetResponse.
 func (h *WebSocketHandler) parseTickerResponseMessage(
-	msg TickerResponseMessage,
+	px *pb.PublicMiniTickerV3Api,
 ) (types.PriceResponse, error) {
 	var (
 		resolved   = make(types.ResolvedPrices)
 		unResolved = make(types.UnResolvedPrices)
 	)
 
-	ticker, ok := h.cache.FromOffChainTicker(msg.Data.Symbol)
+	ticker, ok := h.cache.FromOffChainTicker(px.Symbol)
 	if !ok {
 		return types.NewPriceResponse(resolved, unResolved),
-			fmt.Errorf("unknown ticker %s", msg.Data.Symbol)
+			fmt.Errorf("unknown ticker %s", px.Symbol)
 	}
 
-	// Ensure that the channel received is the ticker channel.
-	if !strings.HasPrefix(msg.Channel, string(MiniTickerChannel)) {
-		err := fmt.Errorf("invalid channel %s", msg.Channel)
-		unResolved[ticker] = providertypes.UnresolvedResult{
-			ErrorWithCode: providertypes.NewErrorWithCode(err, providertypes.ErrorInvalidWebSocketTopic),
-		}
-		return types.NewPriceResponse(resolved, unResolved), err
-	}
-
-	// Convert the price.
-	price, err := math.Float64StringToBigFloat(msg.Data.Price)
+	price, err := math.Float64StringToBigFloat(px.Price)
 	if err != nil {
 		unResolved[ticker] = providertypes.UnresolvedResult{
 			ErrorWithCode: providertypes.NewErrorWithCode(err, providertypes.ErrorFailedToParsePrice),

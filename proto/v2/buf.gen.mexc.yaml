@@ -1,0 +1,23 @@
+version: v2
+
+managed:
+  enabled: true
+  disable:
+    - module: buf.build/googleapis/googleapis
+    - module: buf.build/cosmos/gogo-proto
+    - module: buf.build/cosmos/cosmos-proto
+  override:
+    - file_option: go_package_prefix
+      module: buf.build/dydxprotocol/vendors-mexc-proto
+      value: github.com/dydxprotocol/slinky/providers/websockets/mexc/pb
+
+plugins:
+  - remote: buf.build/protocolbuffers/go
+    out: ../../providers/websockets/mexc/pb
+    opt: paths=source_relative
+  - remote: buf.build/grpc/go
+    out: ../../providers/websockets/mexc/pb
+    opt: paths=source_relative
+
+inputs:
+  - directory: vendors/mexc/websocket-proto

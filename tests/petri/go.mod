@@ -1,6 +1,6 @@
 module github.com/dydxprotocol/slinky/tests/petri
 
-go 1.25.1
+go 1.25.4
 
 require (
 	github.com/cosmos/cosmos-sdk v0.50.11

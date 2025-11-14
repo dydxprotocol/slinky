@@ -9,53 +9,13 @@ import (
 	"github.com/dydxprotocol/slinky/providers/base/websocket/handlers"
 )
 
-type (
-	// MethodType defines the type of message that is being sent to the MEXC websocket.
-	MethodType string
-
-	// ChannelType defines the type of channel that the client is subscribing to.
-	ChannelType string
-)
-
-const (
-	// SubscriptionMethod is the method that is sent to the MEXC websocket to subscribe to a
-	// currency pair i.e. market.
-	//
-	// ref: https://mexcdevelop.github.io/apidocs/spot_v3_en/#live-subscribing-unsubscribing-to-streams
-	SubscriptionMethod MethodType = "SUBSCRIPTION"
-
-	// PingMethod is the method that is sent to the MEXC websocket to ping the server. This should
-	// be done every 30 seconds.
-	//
-	// ref: https://mexcdevelop.github.io/apidocs/spot_v3_en/#live-subscribing-unsubscribing-to-streams
-	PingMethod MethodType = "PING"
-
-	// PongMethod is the method that is sent from the server to the client to confirm that the
-	// client has successfully pinged the server.
-	//
-	// ref: https://mexcdevelop.github.io/apidocs/spot_v3_en/#live-subscribing-unsubscribing-to-streams
-	PongMethod MethodType = "PONG"
-
-	// MiniTickerChannel is the channel that is used to subscribe to the mini ticker data for a
-	// currency pair i.e. market.
-	//
-	// ex: spot@public.miniTicker.v3.api@BTCUSDT@UTC+8
-	//
-	// ref: https://mexcdevelop.github.io/apidocs/spot_v3_en/#miniticker
-	MiniTickerChannel ChannelType = "spot@public.miniTicker.v3.api@"
-)
+const MiniTickerChannel string = "spot@public.miniTicker.v3.api.pb@"
 
 // BaseMessage defines the base message that is used to determine the type of message that is being
 // sent to the MEXC websocket.
 type BaseMessage struct {
-	// ID is the ID of the subscription request.
-	ID int64 `json:"id"`
-
-	// Code is the status code of the subscription request.
-	Code int64 `json:"code"`
-
-	// Message is the message that is sent from the MEXC websocket to confirm that
-	// the client has successfully subscribed to a currency pair i.e. market.
+	ID      int64  `json:"id"`
+	Code    int64  `json:"code"`
 	Message string `json:"msg"`
 }
 
@@ -99,7 +59,7 @@ func (h *WebSocketHandler) NewSubscribeRequestMessage(instruments []string) ([]h
 		end := slinkymath.Min((i+1)*h.ws.MaxSubscriptionsPerBatch, numInstruments)
 
 		bz, err := json.Marshal(SubscriptionRequestMessage{
-			Method: string(SubscriptionMethod),
+			Method: "SUBSCRIPTION",
 			Params: instruments[start:end],
 		})
 		if err != nil {
@@ -140,7 +100,7 @@ type PingRequestMessage struct {
 func NewPingRequestMessage() ([]handlers.WebsocketEncodedMessage, error) {
 	bz, err := json.Marshal(PingRequestMessage{
 		BaseMessage: BaseMessage{
-			Message: string(PingMethod),
+			Message: "PING",
 		},
 	})
 	if err != nil {

@@ -43,3 +43,5 @@ oracle.json
 build*
 *.tgz
 *.tar.gz
+
+.aider*

@@ -1,6 +1,6 @@
 module github.com/dydxprotocol/slinky
 
-go 1.25.1
+go 1.25.4
 
 require (
 	cosmossdk.io/api v0.7.6
