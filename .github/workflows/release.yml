@@ -1,11 +1,9 @@
 name: Release
-# This workflow helps with creating releases.
-# This job will only be triggered when a tag (vX.X.x) is pushed
 on:
-  push:
-    # Sequence of patterns matched against refs/tags
+  push:  # git trigger
     tags:
-      - "v*.**" # Push events to matching v*.*, i.e. v0.0.0, v0.0.0-alpha.0, etc.
+      - "v*.*.*"
+  create:  # github UI trigger
 
 permissions:
   contents: read
@@ -14,6 +12,15 @@ jobs:
   release:
     permissions:
       contents: write # for goreleaser/goreleaser-action to create a GitHub release
+    if: >
+      (
+        github.event_name == 'push' &&
+        startsWith(github.ref, 'refs/tags/v')
+      ) || (
+        github.event_name == 'create' &&
+        github.event.ref_type == 'tag' &&
+        startsWith(github.ref, 'refs/tags/v')
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
