@@ -75,7 +75,10 @@ func (h *APIHandler) ParseResponse(
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return types.NewPriceResponseWithErr(
 			tickers,
-			providertypes.NewErrorWithCode(err, providertypes.ErrorFailedToDecode),
+			providertypes.NewErrorWithCode(
+				fmt.Errorf("failed to decode stork response: %w", err),
+				providertypes.ErrorFailedToDecode,
+			),
 		)
 	}
 
