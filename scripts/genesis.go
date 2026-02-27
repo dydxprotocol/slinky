@@ -24,6 +24,7 @@ var (
 	useOsmosis       = flag.Bool("use-osmosis", false, "use osmosis markets")
 	usePolymarket    = flag.Bool("use-polymarket", false, "use polymarket markets")
 	useForex         = flag.Bool("use-forex", false, "use forex markets")
+	useStork         = flag.Bool("use-stork", false, "use stork markets")
 	tempFile         = flag.String("temp-file", "markets.json", "temporary file to store the market map")
 )
 
@@ -103,6 +104,11 @@ func main() {
 	if *useForex {
 		fmt.Fprintf(flag.CommandLine.Output(), "Using forex markets\n")
 		marketMap = mergeMarketMaps(marketMap, marketmaps.ForexMarketMap)
+	}
+
+	if *useStork {
+		fmt.Fprintf(flag.CommandLine.Output(), "Using stork markets\n")
+		marketMap = mergeMarketMaps(marketMap, marketmaps.StorkMarketMap)
 	}
 
 	if err := marketMap.ValidateBasic(); err != nil {

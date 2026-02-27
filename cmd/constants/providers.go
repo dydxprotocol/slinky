@@ -16,6 +16,7 @@ import (
 	krakenapi "github.com/dydxprotocol/slinky/providers/apis/kraken"
 	"github.com/dydxprotocol/slinky/providers/apis/marketmap"
 	"github.com/dydxprotocol/slinky/providers/apis/polymarket"
+	"github.com/dydxprotocol/slinky/providers/apis/stork"
 	"github.com/dydxprotocol/slinky/providers/volatile"
 	binancews "github.com/dydxprotocol/slinky/providers/websockets/binance"
 	"github.com/dydxprotocol/slinky/providers/websockets/bitfinex"
@@ -159,6 +160,13 @@ var (
 		{
 			Name: polymarket.Name,
 			API:  polymarket.DefaultAPIConfig,
+			Type: types.ConfigType,
+		},
+
+		// Stork provider
+		{
+			Name: stork.Name,
+			API:  stork.DefaultAPIConfig,
 			Type: types.ConfigType,
 		},
 
