@@ -25,7 +25,7 @@ go install .
 ```
 ## Validator Usage
 
-To read how to run the oracle as a validator based on the chain, please reference the [validator documentation](https://docs.skip.build/connect/validators/quickstart).
+To read how to run the oracle as a validator based on the chain, please reference the [validator documentation](https://docs.dydx.xyz/nodes/running-node/running-a-validator).
 
 ## Developer Usage
 
