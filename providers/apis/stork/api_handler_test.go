@@ -166,6 +166,7 @@ func TestParseResponse(t *testing.T) {
 			name: "valid single with signature",
 			cps:  []types.ProviderTicker{xagusd},
 			response: func(t *testing.T) *http.Response {
+				t.Helper()
 				return testutils.CreateResponseFromJSON(
 					signedResponseJSON(t, "XAGUSD", "30500000000000000000", true),
 				)
@@ -198,6 +199,7 @@ func TestParseResponse(t *testing.T) {
 			name: "isValid false",
 			cps:  []types.ProviderTicker{xagusd},
 			response: func(t *testing.T) *http.Response {
+				t.Helper()
 				return testutils.CreateResponseFromJSON(
 					signedResponseJSON(t, "XAGUSD", "30500000000000000000", false),
 				)
@@ -217,6 +219,7 @@ func TestParseResponse(t *testing.T) {
 			name: "signature verification fails",
 			cps:  []types.ProviderTicker{xagusd},
 			response: func(t *testing.T) *http.Response {
+				t.Helper()
 				t.Setenv(stork.StorkPubKeyEnv, "0x0000000000000000000000000000000000000001")
 				return testutils.CreateResponseFromJSON(badSigResponseJSON())
 			},
@@ -235,6 +238,7 @@ func TestParseResponse(t *testing.T) {
 			name: "bad price value",
 			cps:  []types.ProviderTicker{xagusd},
 			response: func(t *testing.T) *http.Response {
+				t.Helper()
 				return testutils.CreateResponseFromJSON(
 					signedResponseJSON(t, "XAGUSD", "$30.50", true),
 				)
@@ -254,6 +258,7 @@ func TestParseResponse(t *testing.T) {
 			name: "empty price string",
 			cps:  []types.ProviderTicker{xagusd},
 			response: func(t *testing.T) *http.Response {
+				t.Helper()
 				return testutils.CreateResponseFromJSON(
 					signedResponseJSON(t, "XAGUSD", "", true),
 				)
@@ -273,6 +278,7 @@ func TestParseResponse(t *testing.T) {
 			name: "zero price",
 			cps:  []types.ProviderTicker{xagusd},
 			response: func(t *testing.T) *http.Response {
+				t.Helper()
 				return testutils.CreateResponseFromJSON(
 					signedResponseJSON(t, "XAGUSD", "0", true),
 				)
@@ -288,6 +294,7 @@ func TestParseResponse(t *testing.T) {
 			name: "very large price",
 			cps:  []types.ProviderTicker{xagusd},
 			response: func(t *testing.T) *http.Response {
+				t.Helper()
 				return testutils.CreateResponseFromJSON(
 					signedResponseJSON(t, "XAGUSD", "999999999000000000000000000000", true),
 				)
@@ -303,6 +310,7 @@ func TestParseResponse(t *testing.T) {
 			name: "extra tickers marked unresolved",
 			cps:  []types.ProviderTicker{xagusd, spxusd},
 			response: func(t *testing.T) *http.Response {
+				t.Helper()
 				return testutils.CreateResponseFromJSON(
 					signedResponseJSON(t, "XAGUSD", "30500000000000000000", true),
 				)
@@ -364,7 +372,7 @@ func TestVerifyStorkSignature(t *testing.T) {
 		sig, err := ethcrypto.Sign(digest, key)
 		require.NoError(t, err)
 
-		sp := stork.StorkSignedPrice{
+		sp := stork.SignedPrice{
 			PublicKey: addr.Hex(),
 			TimestampedSignature: stork.TimestampedSignature{
 				Signature: stork.EvmSignature{
@@ -381,7 +389,7 @@ func TestVerifyStorkSignature(t *testing.T) {
 	t.Run("valid production signature for XAU-USD", func(t *testing.T) {
 		t.Setenv(stork.StorkPubKeyEnv, "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44")
 
-		sp := stork.StorkSignedPrice{
+		sp := stork.SignedPrice{
 			PublicKey:      "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
 			EncodedAssetID: "0xe21c86d8b6a127bfef214d88fdb0c279e55d27dd8c443733e46c8d3de3c98cd6",
 			Price:          "5176579999999999000000",
@@ -407,7 +415,7 @@ func TestVerifyStorkSignature(t *testing.T) {
 	t.Run("production signature with wrong public key", func(t *testing.T) {
 		t.Setenv(stork.StorkPubKeyEnv, "0x0000000000000000000000000000000000000001")
 
-		sp := stork.StorkSignedPrice{
+		sp := stork.SignedPrice{
 			PublicKey:      "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
 			EncodedAssetID: "0xe21c86d8b6a127bfef214d88fdb0c279e55d27dd8c443733e46c8d3de3c98cd6",
 			Price:          "5176579999999999000000",
@@ -443,7 +451,7 @@ func TestVerifyStorkSignature(t *testing.T) {
 		sig, err := ethcrypto.Sign(digest, key)
 		require.NoError(t, err)
 
-		sp := stork.StorkSignedPrice{
+		sp := stork.SignedPrice{
 			PublicKey: "0x0000000000000000000000000000000000000001",
 			TimestampedSignature: stork.TimestampedSignature{
 				Signature: stork.EvmSignature{
@@ -462,7 +470,7 @@ func TestVerifyStorkSignature(t *testing.T) {
 	t.Run("env var not set", func(t *testing.T) {
 		t.Setenv(stork.StorkPubKeyEnv, "")
 
-		sp := stork.StorkSignedPrice{
+		sp := stork.SignedPrice{
 			PublicKey: "0x0000000000000000000000000000000000000001",
 			TimestampedSignature: stork.TimestampedSignature{
 				Signature: stork.EvmSignature{R: "0xaa", S: "0xbb", V: "0x1c"},
@@ -477,7 +485,7 @@ func TestVerifyStorkSignature(t *testing.T) {
 	t.Run("invalid msg_hash length", func(t *testing.T) {
 		t.Setenv(stork.StorkPubKeyEnv, "0x0000000000000000000000000000000000000001")
 
-		sp := stork.StorkSignedPrice{
+		sp := stork.SignedPrice{
 			PublicKey: "0x0000000000000000000000000000000000000001",
 			TimestampedSignature: stork.TimestampedSignature{
 				Signature: stork.EvmSignature{R: "0xaa", S: "0xbb", V: "0x1c"},

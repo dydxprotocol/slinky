@@ -43,24 +43,24 @@ var DefaultAPIConfig = config.APIConfig{
 	}},
 }
 
-// StorkPriceResponse is the top-level response from the Stork API for a single asset.
-type StorkPriceResponse struct {
-	Market                     string                     `json:"market"`
-	Price                      string                     `json:"price"`
-	TimestampMs                int64                      `json:"timestampMs"`
-	IsValid                    bool                       `json:"isValid"`
-	StorkSignatureVerification StorkSignatureVerification `json:"storkSignatureVerification"`
+// PriceResponse is the top-level response from the Stork API for a single asset.
+type PriceResponse struct {
+	Market                     string                `json:"market"`
+	Price                      string                `json:"price"`
+	TimestampMs                int64                 `json:"timestampMs"`
+	IsValid                    bool                  `json:"isValid"`
+	StorkSignatureVerification SignatureVerification `json:"storkSignatureVerification"`
 }
 
-// StorkSignatureVerification wraps the aggregator-signed price and the
+// SignatureVerification wraps the aggregator-signed price and the
 // individual publisher-signed prices used to derive it.
-type StorkSignatureVerification struct {
-	StorkSignedPrice StorkSignedPrice      `json:"stork_signed_price"`
+type SignatureVerification struct {
+	StorkSignedPrice SignedPrice            `json:"stork_signed_price"`
 	SignedPrices     []PublisherSignedPrice `json:"signed_prices"`
 }
 
-// StorkSignedPrice is the aggregator-level signed price produced by Stork.
-type StorkSignedPrice struct {
+// SignedPrice is the aggregator-level signed price produced by Stork.
+type SignedPrice struct {
 	PublicKey            string               `json:"public_key"`
 	EncodedAssetID       string               `json:"encoded_asset_id"`
 	Price                string               `json:"price"`
@@ -103,7 +103,7 @@ type PublisherSignedPrice struct {
 // VerifyStorkSignature recovers the signer address from the aggregator's
 // ECDSA signature and checks it against the trusted public key from the
 // STORK_PUB_KEY environment variable.
-func VerifyStorkSignature(sp StorkSignedPrice) error {
+func VerifyStorkSignature(sp SignedPrice) error {
 	expectedHex := os.Getenv(StorkPubKeyEnv)
 	if expectedHex == "" {
 		return fmt.Errorf("%s environment variable is not set", StorkPubKeyEnv)

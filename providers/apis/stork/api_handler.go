@@ -71,7 +71,7 @@ func (h *APIHandler) ParseResponse(
 	tickers []types.ProviderTicker,
 	resp *http.Response,
 ) types.PriceResponse {
-	var result StorkPriceResponse
+	var result PriceResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return types.NewPriceResponseWithErr(
 			tickers,
