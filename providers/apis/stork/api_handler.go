@@ -59,19 +59,19 @@ func (h *APIHandler) CreateURL(
 		h.cache.Add(ticker)
 	}
 
-	return fmt.Sprintf("%s?assets=%s", h.api.Endpoints[0].URL, strings.Join(ids, ",")), nil
+	return fmt.Sprintf("%s?asset=%s", h.api.Endpoints[0].URL, strings.Join(ids, ",")), nil
 }
 
 // scaleFactor is 10^18 as a big.Float, used to divide Stork's scaled price values.
 var scaleFactor, _ = new(big.Float).SetString("1000000000000000000")
 
-// ParseResponse parses the response from the Stork API. Stork returns prices as
-// integer strings scaled by 10^18, so we divide to get the actual price.
+// ParseResponse parses a single-asset Stork API response, verifies the
+// aggregator's ECDSA signature, and returns the price scaled down by 10^18.
 func (h *APIHandler) ParseResponse(
 	tickers []types.ProviderTicker,
 	resp *http.Response,
 ) types.PriceResponse {
-	var result LatestPricesResponse
+	var result StorkPriceResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return types.NewPriceResponseWithErr(
 			tickers,
@@ -81,41 +81,63 @@ func (h *APIHandler) ParseResponse(
 			),
 		)
 	}
-
 	var (
 		resolved   = make(types.ResolvedPrices)
 		unresolved = make(types.UnResolvedPrices)
 	)
 
-	for assetID, assetPrice := range result.Data {
-		ticker, ok := h.cache.FromOffChainTicker(assetID)
-		if !ok {
-			continue
-		}
-
-		rawPrice, ok := new(big.Float).SetString(assetPrice.Price)
-		if !ok {
-			wErr := fmt.Errorf("failed to parse price %s for %s", assetPrice.Price, assetID)
-			unresolved[ticker] = providertypes.UnresolvedResult{
-				ErrorWithCode: providertypes.NewErrorWithCode(wErr, providertypes.ErrorFailedToParsePrice),
-			}
-			continue
-		}
-
-		price := new(big.Float).Quo(rawPrice, scaleFactor)
-		resolved[ticker] = types.NewPriceResult(price, time.Now().UTC())
+	if len(tickers) == 0 {
+		return types.NewPriceResponse(resolved, unresolved)
 	}
 
-	for _, ticker := range tickers {
-		_, resolvedOk := resolved[ticker]
-		_, unresolvedOk := unresolved[ticker]
+	// The API is atomic (one ticker per request), so the response
+	// corresponds to the first (and only) requested ticker.
+	ticker := tickers[0]
 
-		if !resolvedOk && !unresolvedOk {
-			unresolved[ticker] = providertypes.UnresolvedResult{
-				ErrorWithCode: providertypes.NewErrorWithCode(fmt.Errorf("no response"), providertypes.ErrorNoResponse),
-			}
+	if !result.IsValid {
+		unresolved[ticker] = providertypes.UnresolvedResult{
+			ErrorWithCode: providertypes.NewErrorWithCode(
+				fmt.Errorf("stork marked price invalid for %s", result.Market),
+				providertypes.ErrorInvalidResponse,
+			),
 		}
+		markRemainingUnresolved(tickers[1:], unresolved)
+		return types.NewPriceResponse(resolved, unresolved)
 	}
-
+	if err := VerifyStorkSignature(result.StorkSignatureVerification.StorkSignedPrice); err != nil {
+		unresolved[ticker] = providertypes.UnresolvedResult{
+			ErrorWithCode: providertypes.NewErrorWithCode(
+				fmt.Errorf("stork signature verification failed for %s: %w", result.Market, err),
+				providertypes.ErrorInvalidResponse,
+			),
+		}
+		markRemainingUnresolved(tickers[1:], unresolved)
+		return types.NewPriceResponse(resolved, unresolved)
+	}
+	rawPrice, ok := new(big.Float).SetString(result.Price)
+	if !ok {
+		unresolved[ticker] = providertypes.UnresolvedResult{
+			ErrorWithCode: providertypes.NewErrorWithCode(
+				fmt.Errorf("failed to parse price %s for %s", result.Price, result.Market),
+				providertypes.ErrorFailedToParsePrice,
+			),
+		}
+		markRemainingUnresolved(tickers[1:], unresolved)
+		return types.NewPriceResponse(resolved, unresolved)
+	}
+	price := new(big.Float).Quo(rawPrice, scaleFactor)
+	resolved[ticker] = types.NewPriceResult(price, time.Now().UTC())
+	markRemainingUnresolved(tickers[1:], unresolved)
 	return types.NewPriceResponse(resolved, unresolved)
+}
+
+func markRemainingUnresolved(tickers []types.ProviderTicker, out types.UnResolvedPrices) {
+	for _, t := range tickers {
+		out[t] = providertypes.UnresolvedResult{
+			ErrorWithCode: providertypes.NewErrorWithCode(
+				fmt.Errorf("no response"),
+				providertypes.ErrorNoResponse,
+			),
+		}
+	}
 }

@@ -9811,41 +9811,7 @@ var (
         "provider_configs": [
           {
             "name": "stork_api",
-            "off_chain_ticker": "XAGUSD"
-          }
-        ]
-      },
-      "SPX/USD": {
-        "ticker": {
-          "currency_pair": {
-            "Base": "SPX",
-            "Quote": "USD"
-          },
-          "decimals": 8,
-          "min_provider_count": 1,
-          "enabled": true
-        },
-        "provider_configs": [
-          {
-            "name": "stork_api",
-            "off_chain_ticker": "SPXUSD"
-          }
-        ]
-      },
-      "URA/USD": {
-        "ticker": {
-          "currency_pair": {
-            "Base": "URA",
-            "Quote": "USD"
-          },
-          "decimals": 8,
-          "min_provider_count": 1,
-          "enabled": true
-        },
-        "provider_configs": [
-          {
-            "name": "stork_api",
-            "off_chain_ticker": "URA"
+            "off_chain_ticker": "XAG-USD"
           }
         ]
       }
