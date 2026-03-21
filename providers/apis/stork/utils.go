@@ -22,13 +22,13 @@ const (
 	Name = "stork_api"
 
 	// URL is the base URL of the Stork REST API for fetching latest prices.
-	URL = "https://rest.jp.stork-oracle.network/v1/prices/latest"
+	URL = "http://18.117.7.208:8444/prices"
 )
 
 // DefaultAPIConfig is the default configuration for the Stork API.
 var DefaultAPIConfig = config.APIConfig{
 	Name:             Name,
-	Atomic:           true,
+	Atomic:           false,
 	Enabled:          true,
 	Timeout:          3000 * time.Millisecond,
 	Interval:         3000 * time.Millisecond,
@@ -43,12 +43,17 @@ var DefaultAPIConfig = config.APIConfig{
 	}},
 }
 
-// PriceResponse is the top-level response from the Stork API for a single asset.
+// BatchPriceResponse is the top-level response from the Stork API containing
+// prices for multiple assets.
+type BatchPriceResponse struct {
+	Data []PriceResponse `json:"data"`
+}
+
+// PriceResponse is a single asset entry within the batch response.
 type PriceResponse struct {
 	Market                     string                `json:"market"`
 	Price                      string                `json:"price"`
 	TimestampMs                int64                 `json:"timestampMs"`
-	IsValid                    bool                  `json:"isValid"`
 	StorkSignatureVerification SignatureVerification `json:"storkSignatureVerification"`
 }
 

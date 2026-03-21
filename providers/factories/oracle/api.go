@@ -100,7 +100,7 @@ func APIQueryHandlerFactory(
 	case providerName == polymarket.Name:
 		apiDataHandler, err = polymarket.NewAPIHandler(cfg.API)
 	case providerName == stork.Name:
-		apiDataHandler, err = stork.NewAPIHandler(cfg.API)
+		apiDataHandler, err = stork.NewAPIHandler(logger, cfg.API)
 	default:
 		return nil, fmt.Errorf("unknown provider: %s", cfg.Name)
 	}

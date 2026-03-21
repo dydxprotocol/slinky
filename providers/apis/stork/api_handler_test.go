@@ -1,10 +1,12 @@
 package stork_test
 
 import (
+	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
 	"math/big"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -26,20 +28,13 @@ var (
 	}
 )
 
-// signedResponseJSON builds a StorkPriceResponse JSON string with a valid
-// ECDSA signature produced from a fresh key. It also sets the STORK_PUB_KEY
-// env var to the generated address so VerifyStorkSignature passes.
-func signedResponseJSON(t *testing.T, market, price string, isValid bool) string {
+// signedItemJSON returns a single PriceResponse item JSON with a valid ECDSA
+// signature. The caller must have already set STORK_PUB_KEY via t.Setenv.
+func signedItemJSON(t *testing.T, key *ecdsa.PrivateKey, market, price string) string {
 	t.Helper()
-	key, err := ethcrypto.GenerateKey()
-	require.NoError(t, err)
 	addr := ethcrypto.PubkeyToAddress(key.PublicKey)
 
-	t.Setenv(stork.StorkPubKeyEnv, addr.Hex())
-
-	msgHash := ethcrypto.Keccak256([]byte("test-stork-msg"))
-	// VerifyStorkSignature applies the EIP-191 prefix before ecrecover,
-	// so we must sign the prefixed digest to produce a matching signature.
+	msgHash := ethcrypto.Keccak256([]byte("test-stork-msg-" + market))
 	prefix := []byte("\x19Ethereum Signed Message:\n32")
 	digest := ethcrypto.Keccak256(append(prefix, msgHash...))
 	sig, err := ethcrypto.Sign(digest, key)
@@ -49,7 +44,6 @@ func signedResponseJSON(t *testing.T, market, price string, isValid bool) string
 		"market": %q,
 		"price": %q,
 		"timestampMs": 1234567890000,
-		"isValid": %t,
 		"storkSignatureVerification": {
 			"stork_signed_price": {
 				"public_key": %q,
@@ -69,7 +63,7 @@ func signedResponseJSON(t *testing.T, market, price string, isValid bool) string
 			},
 			"signed_prices": []
 		}
-	}`, market, price, isValid,
+	}`, market, price,
 		addr.Hex(), price,
 		hex.EncodeToString(sig[0:32]),
 		hex.EncodeToString(sig[32:64]),
@@ -77,14 +71,33 @@ func signedResponseJSON(t *testing.T, market, price string, isValid bool) string
 		hex.EncodeToString(msgHash))
 }
 
-// badSigResponseJSON returns a response where the public_key does not match
-// the actual signer, so verification should fail.
-func badSigResponseJSON() string {
-	return `{
+// signedBatchJSON builds a full {"data": [...]} response with one or more
+// signed items. It generates a key and sets STORK_PUB_KEY for the test.
+func signedBatchJSON(t *testing.T, items ...struct {
+	market string
+	price  string
+}) string {
+	t.Helper()
+	key, err := ethcrypto.GenerateKey()
+	require.NoError(t, err)
+	addr := ethcrypto.PubkeyToAddress(key.PublicKey)
+	t.Setenv(stork.StorkPubKeyEnv, addr.Hex())
+
+	parts := make([]string, len(items))
+	for i, item := range items {
+		parts[i] = signedItemJSON(t, key, item.market, item.price)
+	}
+
+	return `{"data":[` + strings.Join(parts, ",") + `]}`
+}
+
+// badSigBatchJSON returns a {"data":[...]} response where the public_key does
+// not match the actual signer, so verification should fail.
+func badSigBatchJSON() string {
+	return `{"data":[{
 		"market": "XAGUSD",
 		"price": "30500000000000000000",
 		"timestampMs": 1234567890000,
-		"isValid": true,
 		"storkSignatureVerification": {
 			"stork_signed_price": {
 				"public_key": "0x0000000000000000000000000000000000000001",
@@ -104,7 +117,7 @@ func badSigResponseJSON() string {
 			},
 			"signed_prices": []
 		}
-	}`
+	}]}`
 }
 
 func TestCreateURL(t *testing.T) {
@@ -125,7 +138,7 @@ func TestCreateURL(t *testing.T) {
 			cps: []types.ProviderTicker{
 				xagusd,
 			},
-			url:         fmt.Sprintf("%s?assets=%s", stork.URL, "XAGUSD"),
+			url:         fmt.Sprintf("%s?asset=%s", stork.URL, "XAGUSD"),
 			expectedErr: false,
 		},
 		{
@@ -134,14 +147,14 @@ func TestCreateURL(t *testing.T) {
 				xagusd,
 				spxusd,
 			},
-			url:         fmt.Sprintf("%s?assets=%s", stork.URL, "XAGUSD,SPXUSD"),
+			url:         fmt.Sprintf("%s?asset=%s", stork.URL, "XAGUSD,SPXUSD"),
 			expectedErr: false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			h, err := stork.NewAPIHandler(stork.DefaultAPIConfig)
+			h, err := stork.NewAPIHandler(nil, stork.DefaultAPIConfig)
 			require.NoError(t, err)
 
 			url, err := h.CreateURL(tc.cps)
@@ -156,6 +169,11 @@ func TestCreateURL(t *testing.T) {
 }
 
 func TestParseResponse(t *testing.T) {
+	type item struct {
+		market string
+		price  string
+	}
+
 	testCases := []struct {
 		name     string
 		cps      []types.ProviderTicker
@@ -163,17 +181,37 @@ func TestParseResponse(t *testing.T) {
 		expected types.PriceResponse
 	}{
 		{
-			name: "valid single with signature",
+			name: "valid single in batch",
 			cps:  []types.ProviderTicker{xagusd},
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
 				return testutils.CreateResponseFromJSON(
-					signedResponseJSON(t, "XAGUSD", "30500000000000000000", true),
+					signedBatchJSON(t, item{"XAGUSD", "30500000000000000000"}),
 				)
 			},
 			expected: types.NewPriceResponse(
 				types.ResolvedPrices{
 					xagusd: {Value: big.NewFloat(30.5)},
+				},
+				types.UnResolvedPrices{},
+			),
+		},
+		{
+			name: "multiple tickers resolved",
+			cps:  []types.ProviderTicker{xagusd, spxusd},
+			response: func(t *testing.T) *http.Response {
+				t.Helper()
+				return testutils.CreateResponseFromJSON(
+					signedBatchJSON(t,
+						item{"XAGUSD", "30500000000000000000"},
+						item{"SPXUSD", "5500000000000000000000"},
+					),
+				)
+			},
+			expected: types.NewPriceResponse(
+				types.ResolvedPrices{
+					xagusd: {Value: big.NewFloat(30.5)},
+					spxusd: {Value: big.NewFloat(5500)},
 				},
 				types.UnResolvedPrices{},
 			),
@@ -196,32 +234,12 @@ func TestParseResponse(t *testing.T) {
 			),
 		},
 		{
-			name: "isValid false",
-			cps:  []types.ProviderTicker{xagusd},
-			response: func(t *testing.T) *http.Response {
-				t.Helper()
-				return testutils.CreateResponseFromJSON(
-					signedResponseJSON(t, "XAGUSD", "30500000000000000000", false),
-				)
-			},
-			expected: types.NewPriceResponse(
-				types.ResolvedPrices{},
-				types.UnResolvedPrices{
-					xagusd: providertypes.UnresolvedResult{
-						ErrorWithCode: providertypes.NewErrorWithCode(
-							fmt.Errorf("invalid"), providertypes.ErrorAPIGeneral,
-						),
-					},
-				},
-			),
-		},
-		{
 			name: "signature verification fails",
 			cps:  []types.ProviderTicker{xagusd},
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
 				t.Setenv(stork.StorkPubKeyEnv, "0x0000000000000000000000000000000000000001")
-				return testutils.CreateResponseFromJSON(badSigResponseJSON())
+				return testutils.CreateResponseFromJSON(badSigBatchJSON())
 			},
 			expected: types.NewPriceResponse(
 				types.ResolvedPrices{},
@@ -240,7 +258,7 @@ func TestParseResponse(t *testing.T) {
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
 				return testutils.CreateResponseFromJSON(
-					signedResponseJSON(t, "XAGUSD", "$30.50", true),
+					signedBatchJSON(t, item{"XAGUSD", "$30.50"}),
 				)
 			},
 			expected: types.NewPriceResponse(
@@ -260,7 +278,7 @@ func TestParseResponse(t *testing.T) {
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
 				return testutils.CreateResponseFromJSON(
-					signedResponseJSON(t, "XAGUSD", "", true),
+					signedBatchJSON(t, item{"XAGUSD", ""}),
 				)
 			},
 			expected: types.NewPriceResponse(
@@ -280,7 +298,7 @@ func TestParseResponse(t *testing.T) {
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
 				return testutils.CreateResponseFromJSON(
-					signedResponseJSON(t, "XAGUSD", "0", true),
+					signedBatchJSON(t, item{"XAGUSD", "0"}),
 				)
 			},
 			expected: types.NewPriceResponse(
@@ -296,7 +314,7 @@ func TestParseResponse(t *testing.T) {
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
 				return testutils.CreateResponseFromJSON(
-					signedResponseJSON(t, "XAGUSD", "999999999000000000000000000000", true),
+					signedBatchJSON(t, item{"XAGUSD", "999999999000000000000000000000"}),
 				)
 			},
 			expected: types.NewPriceResponse(
@@ -307,12 +325,12 @@ func TestParseResponse(t *testing.T) {
 			),
 		},
 		{
-			name: "extra tickers marked unresolved",
+			name: "ticker not in batch response",
 			cps:  []types.ProviderTicker{xagusd, spxusd},
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
 				return testutils.CreateResponseFromJSON(
-					signedResponseJSON(t, "XAGUSD", "30500000000000000000", true),
+					signedBatchJSON(t, item{"XAGUSD", "30500000000000000000"}),
 				)
 			},
 			expected: types.NewPriceResponse(
@@ -328,11 +346,28 @@ func TestParseResponse(t *testing.T) {
 				},
 			),
 		},
+		{
+			name: "empty batch data",
+			cps:  []types.ProviderTicker{xagusd},
+			response: func(_ *testing.T) *http.Response {
+				return testutils.CreateResponseFromJSON(`{"data":[]}`)
+			},
+			expected: types.NewPriceResponse(
+				types.ResolvedPrices{},
+				types.UnResolvedPrices{
+					xagusd: providertypes.UnresolvedResult{
+						ErrorWithCode: providertypes.NewErrorWithCode(
+							fmt.Errorf("no response"), providertypes.ErrorAPIGeneral,
+						),
+					},
+				},
+			),
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			h, err := stork.NewAPIHandler(stork.DefaultAPIConfig)
+			h, err := stork.NewAPIHandler(nil, stork.DefaultAPIConfig)
 			require.NoError(t, err)
 
 			_, err = h.CreateURL(tc.cps)

@@ -9798,10 +9798,10 @@ var (
 	StorkMarketMapJSON = `
 {
     "markets": {
-      "XAG/USD": {
+      "XAU/USD": {
         "ticker": {
           "currency_pair": {
-            "Base": "XAG",
+            "Base": "XAU",
             "Quote": "USD"
           },
           "decimals": 8,
@@ -9811,7 +9811,7 @@ var (
         "provider_configs": [
           {
             "name": "stork_api",
-            "off_chain_ticker": "XAG-USD"
+            "off_chain_ticker": "XAUUSD"
           }
         ]
       }
