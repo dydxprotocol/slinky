@@ -9789,6 +9789,35 @@ var (
    }
 }`
 
+	// StorkMarketMap is used to initialize the Stork market map. This only includes
+	// the markets that are supported by Stork.
+	StorkMarketMap mmtypes.MarketMap
+
+	// StorkMarketMapJSON is the JSON representation of the Stork MarketMap that can be used
+	// to initialize for a genesis state or used by the sidecar as a static market map.
+	StorkMarketMapJSON = `
+{
+    "markets": {
+      "XAU/USD": {
+        "ticker": {
+          "currency_pair": {
+            "Base": "XAU",
+            "Quote": "USD"
+          },
+          "decimals": 8,
+          "min_provider_count": 1,
+          "enabled": true
+        },
+        "provider_configs": [
+          {
+            "name": "stork_api",
+            "off_chain_ticker": "XAUUSD"
+          }
+        ]
+      }
+    }
+  }`
+
 	// ForexMarketMap is used to initialize the forex market map. This only includes
 	// forex markets quoted in usdt.
 	ForexMarketMap mmtypes.MarketMap
@@ -9889,6 +9918,7 @@ func init() {
 		unmarshalValidate("Osmosis", OsmosisMarketMapJSON, &OsmosisMarketMap),
 		unmarshalValidate("Polymarket", PolymarketMarketMapJSON, &PolymarketMarketMap),
 		unmarshalValidate("Forex", ForexMarketMapJSON, &ForexMarketMap),
+		unmarshalValidate("Stork", StorkMarketMapJSON, &StorkMarketMap),
 	)
 	if err != nil {
 		panic(err)
