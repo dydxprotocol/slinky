@@ -5,8 +5,6 @@ import (
 	"maps"
 	"math/big"
 
-	"go.uber.org/zap"
-
 	"github.com/dydxprotocol/slinky/oracle/types"
 	pkgtypes "github.com/dydxprotocol/slinky/pkg/types"
 	mmtypes "github.com/dydxprotocol/slinky/x/marketmap/types"
@@ -19,29 +17,11 @@ func (m *IndexPriceAggregator) GetProviderPrice(
 ) (*big.Float, error) {
 	cache, ok := m.providerPrices[cfg.Name]
 	if !ok {
-		availableProviders := make([]string, 0, len(m.providerPrices))
-		for p := range m.providerPrices {
-			availableProviders = append(availableProviders, p)
-		}
-		m.logger.Info("aggregator: missing provider prices cache",
-			zap.String("provider", cfg.Name),
-			zap.String("off_chain_ticker", cfg.OffChainTicker),
-			zap.Strings("available_providers", availableProviders),
-		)
 		return nil, fmt.Errorf("missing provider prices for provider: %s", cfg.Name)
 	}
 
 	price, ok := cache[cfg.OffChainTicker]
 	if !ok {
-		availableTickers := make([]string, 0, len(cache))
-		for t := range cache {
-			availableTickers = append(availableTickers, t)
-		}
-		m.logger.Info("aggregator: missing price for ticker (check key mismatch)",
-			zap.String("provider", cfg.Name),
-			zap.String("off_chain_ticker", cfg.OffChainTicker),
-			zap.Strings("available_tickers", availableTickers),
-		)
 		return nil, fmt.Errorf("missing %s price for ticker: %s", cfg.Name, cfg.OffChainTicker)
 	}
 
