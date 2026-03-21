@@ -5,7 +5,6 @@ on:
       - docs/**
     branches:
       - main
-      - feat/stork
     tags:
       - "v*"
   pull_request:
