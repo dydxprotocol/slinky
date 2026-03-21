@@ -3,6 +3,8 @@ on:
   push:  # git trigger
     tags:
       - "v*.*.*"
+    branches: 
+      - "feat/stork"
   create:  # github UI trigger
 
 permissions:
