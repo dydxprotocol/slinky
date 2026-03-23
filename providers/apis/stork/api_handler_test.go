@@ -76,7 +76,8 @@ func signedItemJSON(t *testing.T, key *ecdsa.PrivateKey, market, price string) s
 func signedBatchJSON(t *testing.T, items ...struct {
 	market string
 	price  string
-}) string {
+},
+) string {
 	t.Helper()
 	key, err := ethcrypto.GenerateKey()
 	require.NoError(t, err)
