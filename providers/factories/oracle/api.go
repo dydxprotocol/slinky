@@ -21,6 +21,7 @@ import (
 	"github.com/dydxprotocol/slinky/providers/apis/geckoterminal"
 	"github.com/dydxprotocol/slinky/providers/apis/kraken"
 	"github.com/dydxprotocol/slinky/providers/apis/polymarket"
+	"github.com/dydxprotocol/slinky/providers/apis/stork"
 	apihandlers "github.com/dydxprotocol/slinky/providers/base/api/handlers"
 	"github.com/dydxprotocol/slinky/providers/base/api/metrics"
 	"github.com/dydxprotocol/slinky/providers/static"
@@ -98,6 +99,8 @@ func APIQueryHandlerFactory(
 		apiPriceFetcher, err = osmosis.NewAPIPriceFetcher(logger, cfg.API, metrics)
 	case providerName == polymarket.Name:
 		apiDataHandler, err = polymarket.NewAPIHandler(cfg.API)
+	case providerName == stork.Name:
+		apiDataHandler, err = stork.NewAPIHandler(cfg.API)
 	default:
 		return nil, fmt.Errorf("unknown provider: %s", cfg.Name)
 	}
