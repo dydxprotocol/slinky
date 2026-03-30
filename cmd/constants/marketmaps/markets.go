@@ -9818,6 +9818,35 @@ var (
     }
   }`
 
+	// PythMarketMap is used to initialize the Pyth market map. This only includes
+	// the markets that are supported by Pyth.
+	PythMarketMap mmtypes.MarketMap
+
+	// PythMarketMapJSON is the JSON representation of the Pyth MarketMap that can be used
+	// to initialize for a genesis state or used by the sidecar as a static market map.
+	PythMarketMapJSON = `
+{
+    "markets": {
+      "WTI/USD": {
+        "ticker": {
+          "currency_pair": {
+            "Base": "WTI",
+            "Quote": "USD"
+          },
+          "decimals": 8,
+          "min_provider_count": 1,
+          "enabled": true
+        },
+        "provider_configs": [
+          {
+            "name": "pyth_api",
+            "off_chain_ticker": "2694"
+          }
+        ]
+      }
+    }
+  }`
+
 	// ForexMarketMap is used to initialize the forex market map. This only includes
 	// forex markets quoted in usdt.
 	ForexMarketMap mmtypes.MarketMap
@@ -9919,6 +9948,7 @@ func init() {
 		unmarshalValidate("Polymarket", PolymarketMarketMapJSON, &PolymarketMarketMap),
 		unmarshalValidate("Forex", ForexMarketMapJSON, &ForexMarketMap),
 		unmarshalValidate("Stork", StorkMarketMapJSON, &StorkMarketMap),
+		unmarshalValidate("Pyth", PythMarketMapJSON, &PythMarketMap),
 	)
 	if err != nil {
 		panic(err)
