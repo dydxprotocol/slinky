@@ -21,6 +21,7 @@ import (
 	"github.com/dydxprotocol/slinky/providers/apis/geckoterminal"
 	"github.com/dydxprotocol/slinky/providers/apis/kraken"
 	"github.com/dydxprotocol/slinky/providers/apis/polymarket"
+	"github.com/dydxprotocol/slinky/providers/apis/pyth"
 	"github.com/dydxprotocol/slinky/providers/apis/stork"
 	apihandlers "github.com/dydxprotocol/slinky/providers/base/api/handlers"
 	"github.com/dydxprotocol/slinky/providers/base/api/metrics"
@@ -99,6 +100,8 @@ func APIQueryHandlerFactory(
 		apiPriceFetcher, err = osmosis.NewAPIPriceFetcher(logger, cfg.API, metrics)
 	case providerName == polymarket.Name:
 		apiDataHandler, err = polymarket.NewAPIHandler(cfg.API)
+	case providerName == pyth.Name:
+		apiDataHandler, err = pyth.NewAPIHandler(cfg.API)
 	case providerName == stork.Name:
 		apiDataHandler, err = stork.NewAPIHandler(cfg.API)
 	default:
