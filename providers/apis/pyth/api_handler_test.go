@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"fmt"
+	"math"
 	"math/big"
 	"net/http"
 	"strings"
@@ -36,11 +37,12 @@ func buildSolanaPayload(t *testing.T, privKey ed25519.PrivateKey, msg []byte) st
 	t.Helper()
 	sig := ed25519.Sign(privKey, msg)
 
+	require.LessOrEqual(t, len(msg), math.MaxUint16)
 	buf := make([]byte, 4+64+32+2+len(msg))
 	binary.LittleEndian.PutUint32(buf[0:4], pyth.SolanaFormatMagic)
 	copy(buf[4:68], sig)
 	copy(buf[68:100], privKey.Public().(ed25519.PublicKey))
-	binary.LittleEndian.PutUint16(buf[100:102], uint16(len(msg)))
+	binary.LittleEndian.PutUint16(buf[100:102], uint16(len(msg))) //nolint:gosec // bounded above
 	copy(buf[102:], msg)
 
 	return base64.StdEncoding.EncodeToString(buf)
@@ -369,11 +371,12 @@ func TestVerifyPythSolanaSignature(t *testing.T) {
 		sig := ed25519.Sign(priv, msg)
 
 		tamperedMsg := []byte("tampered-msg")
+		require.LessOrEqual(t, len(tamperedMsg), math.MaxUint16)
 		buf := make([]byte, 4+64+32+2+len(tamperedMsg))
 		binary.LittleEndian.PutUint32(buf[0:4], pyth.SolanaFormatMagic)
 		copy(buf[4:68], sig)
 		copy(buf[68:100], pub)
-		binary.LittleEndian.PutUint16(buf[100:102], uint16(len(tamperedMsg)))
+		binary.LittleEndian.PutUint16(buf[100:102], uint16(len(tamperedMsg))) //nolint:gosec // bounded above
 		copy(buf[102:], tamperedMsg)
 
 		payload := base64.StdEncoding.EncodeToString(buf)
