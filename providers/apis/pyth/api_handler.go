@@ -1,4 +1,4 @@
-package stork
+package pyth
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/big"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,13 +18,13 @@ import (
 
 var _ types.PriceAPIDataHandler = (*APIHandler)(nil)
 
-// APIHandler implements the PriceAPIDataHandler interface for Stork.
+// APIHandler implements the PriceAPIDataHandler interface for Pyth.
 type APIHandler struct {
 	api   config.APIConfig
 	cache types.ProviderTickers
 }
 
-// NewAPIHandler returns a new Stork PriceAPIDataHandler.
+// NewAPIHandler returns a new Pyth PriceAPIDataHandler.
 func NewAPIHandler(
 	api config.APIConfig,
 ) (types.PriceAPIDataHandler, error) {
@@ -45,8 +46,9 @@ func NewAPIHandler(
 	}, nil
 }
 
-// CreateURL returns the URL used to fetch prices from the Stork API. The asset IDs
-// are passed as a comma-separated query parameter.
+// CreateURL returns the URL used to fetch prices from the Pyth oracle service.
+// Feed IDs are passed as a comma-separated "asset" query parameter, with
+// "&provider=pyth" appended.
 func (h *APIHandler) CreateURL(
 	tickers []types.ProviderTicker,
 ) (string, error) {
@@ -60,14 +62,20 @@ func (h *APIHandler) CreateURL(
 		h.cache.Add(ticker)
 	}
 
-	return fmt.Sprintf("%s?asset=%s&provider=stork", h.api.Endpoints[0].URL, strings.Join(ids, ",")), nil
+	return fmt.Sprintf(
+		"%s?asset=%s&provider=pyth",
+		h.api.Endpoints[0].URL,
+		strings.Join(ids, ","),
+	), nil
 }
 
-// scaleFactor is 10^18 as a big.Float, used to divide Stork's scaled price values.
-var scaleFactor, _ = new(big.Float).SetString("1000000000000000000")
-
-// ParseResponse parses a batch Stork API response ({"data": [...]}), verifies
-// each aggregator's ECDSA signature, and returns prices scaled down by 10^18.
+// ParseResponse parses a batch Pyth API response ({"data": [...]}), verifies
+// each entry's Pyth Solana ed25519 signature, and returns the parsed prices.
+//
+// If the signed payload contains both price mantissa and exponent, the price is
+// computed directly from signed data (mantissa * 10^exponent). If the payload
+// only contains price (no exponent), the signature and feed ID are still
+// verified, but the JSON price field is used as a fallback.
 func (h *APIHandler) ParseResponse(
 	tickers []types.ProviderTicker,
 	resp *http.Response,
@@ -77,7 +85,7 @@ func (h *APIHandler) ParseResponse(
 		return types.NewPriceResponseWithErr(
 			tickers,
 			providertypes.NewErrorWithCode(
-				fmt.Errorf("failed to read stork response body: %w", err),
+				fmt.Errorf("failed to read pyth response body: %w", err),
 				providertypes.ErrorFailedToDecode,
 			),
 		)
@@ -88,17 +96,15 @@ func (h *APIHandler) ParseResponse(
 		return types.NewPriceResponseWithErr(
 			tickers,
 			providertypes.NewErrorWithCode(
-				fmt.Errorf("failed to decode stork response: %w", err),
+				fmt.Errorf("failed to decode pyth response: %w", err),
 				providertypes.ErrorFailedToDecode,
 			),
 		)
 	}
 
-	// Index response items by normalized market name (uppercase, no dashes)
-	// so that "XAU-USD" matches off_chain_ticker "XAUUSD".
 	byMarket := make(map[string]PriceResponse, len(batch.Data))
 	for _, item := range batch.Data {
-		byMarket[normalizeMarket(item.Market)] = item
+		byMarket[item.Market] = item
 	}
 
 	var (
@@ -109,49 +115,68 @@ func (h *APIHandler) ParseResponse(
 	for _, ticker := range tickers {
 		offChain := ticker.GetOffChainTicker()
 
-		item, ok := byMarket[normalizeMarket(offChain)]
+		item, ok := byMarket[offChain]
 		if !ok {
 			unresolved[ticker] = providertypes.UnresolvedResult{
 				ErrorWithCode: providertypes.NewErrorWithCode(
-					fmt.Errorf("no stork response for ticker %s", offChain),
+					fmt.Errorf("no pyth response for feed %s", offChain),
 					providertypes.ErrorNoResponse,
 				),
 			}
 			continue
 		}
 
-		if err := VerifyStorkSignature(item.StorkSignatureVerification.StorkSignedPrice); err != nil {
+		feedID, err := strconv.ParseUint(offChain, 10, 32)
+		if err != nil {
 			unresolved[ticker] = providertypes.UnresolvedResult{
 				ErrorWithCode: providertypes.NewErrorWithCode(
-					fmt.Errorf("stork signature verification failed for %s: %w", item.Market, err),
+					fmt.Errorf("invalid feed ID %q: %w", offChain, err),
 					providertypes.ErrorInvalidResponse,
 				),
 			}
 			continue
 		}
 
-		rawPrice, ok := new(big.Float).SetString(item.Price)
-		if !ok {
+		feed, err := VerifyAndExtractFeed(item.PythSolanaPayload, uint32(feedID))
+		if err != nil {
 			unresolved[ticker] = providertypes.UnresolvedResult{
 				ErrorWithCode: providertypes.NewErrorWithCode(
-					fmt.Errorf("failed to parse price %s for %s", item.Price, item.Market),
-					providertypes.ErrorFailedToParsePrice,
+					fmt.Errorf("pyth payload verification failed for feed %s: %w", offChain, err),
+					providertypes.ErrorInvalidResponse,
 				),
 			}
 			continue
 		}
 
-		price := new(big.Float).Quo(rawPrice, scaleFactor)
+		var price *big.Float
+		if feed.HasPrice && feed.HasExponent {
+			price, err = feed.ComputePrice()
+			if err != nil {
+				unresolved[ticker] = providertypes.UnresolvedResult{
+					ErrorWithCode: providertypes.NewErrorWithCode(
+						fmt.Errorf("failed to compute price from signed payload for feed %s: %w", offChain, err),
+						providertypes.ErrorFailedToParsePrice,
+					),
+				}
+				continue
+			}
+		} else {
+			// Exponent not in the signed payload; fall back to JSON price.
+			// Signature and feed ID have already been verified above.
+			price, ok = new(big.Float).SetString(item.Price)
+			if !ok {
+				unresolved[ticker] = providertypes.UnresolvedResult{
+					ErrorWithCode: providertypes.NewErrorWithCode(
+						fmt.Errorf("failed to parse JSON price %q for feed %s", item.Price, offChain),
+						providertypes.ErrorFailedToParsePrice,
+					),
+				}
+				continue
+			}
+		}
+
 		resolved[ticker] = types.NewPriceResult(price, time.Now().UTC())
 	}
 
 	return types.NewPriceResponse(resolved, unresolved)
-}
-
-// normalizeMarket strips dashes/underscores and uppercases the market name
-// so that "XAU-USD" and "XAUUSD" both become "XAUUSD".
-func normalizeMarket(s string) string {
-	s = strings.ReplaceAll(s, "-", "")
-	s = strings.ReplaceAll(s, "_", "")
-	return strings.ToUpper(s)
 }
