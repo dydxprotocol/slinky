@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/big"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -70,6 +71,11 @@ func (h *APIHandler) CreateURL(
 
 // ParseResponse parses a batch Pyth API response ({"data": [...]}), verifies
 // each entry's Pyth Solana ed25519 signature, and returns the parsed prices.
+//
+// If the signed payload contains both price mantissa and exponent, the price is
+// computed directly from signed data (mantissa * 10^exponent). If the payload
+// only contains price (no exponent), the signature and feed ID are still
+// verified, but the JSON price field is used as a fallback.
 func (h *APIHandler) ParseResponse(
 	tickers []types.ProviderTicker,
 	resp *http.Response,
@@ -120,25 +126,53 @@ func (h *APIHandler) ParseResponse(
 			continue
 		}
 
-		if err := VerifyPythSolanaSignature(item.PythSolanaPayload); err != nil {
+		feedID, err := strconv.ParseUint(offChain, 10, 32)
+		if err != nil {
 			unresolved[ticker] = providertypes.UnresolvedResult{
 				ErrorWithCode: providertypes.NewErrorWithCode(
-					fmt.Errorf("pyth signature verification failed for feed %s: %w", item.Market, err),
+					fmt.Errorf("invalid feed ID %q: %w", offChain, err),
 					providertypes.ErrorInvalidResponse,
 				),
 			}
 			continue
 		}
 
-		price, ok := new(big.Float).SetString(item.Price)
-		if !ok {
+		feed, err := VerifyAndExtractFeed(item.PythSolanaPayload, uint32(feedID)) //nolint:gosec // bounded by ParseUint 32-bit
+		if err != nil {
 			unresolved[ticker] = providertypes.UnresolvedResult{
 				ErrorWithCode: providertypes.NewErrorWithCode(
-					fmt.Errorf("failed to parse price %q for feed %s", item.Price, item.Market),
-					providertypes.ErrorFailedToParsePrice,
+					fmt.Errorf("pyth payload verification failed for feed %s: %w", offChain, err),
+					providertypes.ErrorInvalidResponse,
 				),
 			}
 			continue
+		}
+
+		var price *big.Float
+		if feed.HasPrice && feed.HasExponent {
+			price, err = feed.ComputePrice()
+			if err != nil {
+				unresolved[ticker] = providertypes.UnresolvedResult{
+					ErrorWithCode: providertypes.NewErrorWithCode(
+						fmt.Errorf("failed to compute price from signed payload for feed %s: %w", offChain, err),
+						providertypes.ErrorFailedToParsePrice,
+					),
+				}
+				continue
+			}
+		} else {
+			// Exponent not in the signed payload; fall back to JSON price.
+			// Signature and feed ID have already been verified above.
+			price, ok = new(big.Float).SetString(item.Price)
+			if !ok {
+				unresolved[ticker] = providertypes.UnresolvedResult{
+					ErrorWithCode: providertypes.NewErrorWithCode(
+						fmt.Errorf("failed to parse JSON price %q for feed %s", item.Price, offChain),
+						providertypes.ErrorFailedToParsePrice,
+					),
+				}
+				continue
+			}
 		}
 
 		resolved[ticker] = types.NewPriceResult(price, time.Now().UTC())

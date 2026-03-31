@@ -30,9 +30,80 @@ var (
 	}
 )
 
-// buildSolanaPayload constructs a Pyth Lazer Solana-format payload:
+// buildInnerPayload constructs a Pyth Lazer inner payload (LE) containing a
+// single feed with Price and Exponent properties.
+func buildInnerPayload(feedID uint32, priceMantissa int64, exponent int16) []byte {
+	buf := make([]byte, 31)
+	off := 0
+
+	binary.LittleEndian.PutUint32(buf[off:], pyth.PayloadFormatMagic)
+	off += 4
+	binary.LittleEndian.PutUint64(buf[off:], uint64(time.Now().UnixMicro()))
+	off += 8
+	buf[off] = 3 // channel_id: FIXED_RATE_200
+	off++
+	buf[off] = 1 // num_feeds
+	off++
+
+	binary.LittleEndian.PutUint32(buf[off:], feedID)
+	off += 4
+	buf[off] = 2 // num_properties (price + exponent)
+	off++
+
+	buf[off] = 0 // propPrice tag
+	off++
+	binary.LittleEndian.PutUint64(buf[off:], uint64(priceMantissa))
+	off += 8
+
+	buf[off] = 4 // propExponent tag
+	off++
+	binary.LittleEndian.PutUint16(buf[off:], uint16(exponent))
+
+	return buf
+}
+
+// buildInnerPayloadPriceOnly constructs a Pyth Lazer inner payload with only
+// Price and FeedUpdateTimestamp (no Exponent), matching real production payloads.
+func buildInnerPayloadPriceOnly(feedID uint32, priceMantissa int64) []byte {
+	// magic(4) + timestamp(8) + channel(1) + numFeeds(1)
+	// + feedID(4) + numProps(1)
+	// + propPrice tag(1) + i64(8)
+	// + propFeedUpdateTimestamp tag(1) + present(1) + u64(8)
+	buf := make([]byte, 38)
+	off := 0
+
+	binary.LittleEndian.PutUint32(buf[off:], pyth.PayloadFormatMagic)
+	off += 4
+	ts := uint64(time.Now().UnixMicro())
+	binary.LittleEndian.PutUint64(buf[off:], ts)
+	off += 8
+	buf[off] = 3 // channel_id
+	off++
+	buf[off] = 1 // num_feeds
+	off++
+
+	binary.LittleEndian.PutUint32(buf[off:], feedID)
+	off += 4
+	buf[off] = 2 // num_properties (price + feedUpdateTimestamp)
+	off++
+
+	buf[off] = 0 // propPrice tag
+	off++
+	binary.LittleEndian.PutUint64(buf[off:], uint64(priceMantissa))
+	off += 8
+
+	buf[off] = 12 // propFeedUpdateTimestamp tag
+	off++
+	buf[off] = 1 // present
+	off++
+	binary.LittleEndian.PutUint64(buf[off:], ts)
+
+	return buf
+}
+
+// buildSolanaPayload constructs a Pyth Lazer Solana envelope:
 //
-//	magic(4) || signature(64) || pubkey(32) || msgLen(2) || msg(msgLen)
+//	magic(4) || signature(64) || pubkey(32) || msgLen(2) || msg
 func buildSolanaPayload(t *testing.T, privKey ed25519.PrivateKey, msg []byte) string {
 	t.Helper()
 	sig := ed25519.Sign(privKey, msg)
@@ -48,25 +119,50 @@ func buildSolanaPayload(t *testing.T, privKey ed25519.PrivateKey, msg []byte) st
 	return base64.StdEncoding.EncodeToString(buf)
 }
 
-// signedItemJSON returns a single PriceResponse JSON entry with a valid
-// Pyth Solana payload. The caller must set PYTH_PUB_KEY via t.Setenv.
-func signedItemJSON(t *testing.T, privKey ed25519.PrivateKey, market, price string) string {
+// signedItemJSON returns a PriceResponse JSON entry with a valid signed Pyth
+// Solana payload containing the given feed ID, price mantissa, and exponent.
+func signedItemJSON(
+	t *testing.T,
+	privKey ed25519.PrivateKey,
+	feedID uint32,
+	priceMantissa int64,
+	exponent int16,
+) string {
 	t.Helper()
-	msg := []byte("pyth-test-msg-" + market)
-	payload := buildSolanaPayload(t, privKey, msg)
+	innerPayload := buildInnerPayload(feedID, priceMantissa, exponent)
+	solPayload := buildSolanaPayload(t, privKey, innerPayload)
 	return fmt.Sprintf(
-		`{"market":%q,"price":%q,"timestampMs":1774625883288,"pythSolanaPayload":%q}`,
-		market, price, payload,
+		`{"market":"%d","price":"0","timestampMs":1774625883288,"pythSolanaPayload":%q}`,
+		feedID, solPayload,
 	)
 }
 
-// signedBatchJSON builds a full {"data":[...]} response, generates a key,
-// and sets PYTH_PUB_KEY for the test.
-func signedBatchJSON(t *testing.T, items ...struct {
-	market string
-	price  string
-},
+// signedItemJSONPriceOnly returns a PriceResponse JSON entry with a signed
+// payload that has no Exponent property (only Price + FeedUpdateTimestamp),
+// plus a JSON price field for fallback.
+func signedItemJSONPriceOnly(
+	t *testing.T,
+	privKey ed25519.PrivateKey,
+	feedID uint32,
+	priceMantissa int64,
+	jsonPrice string,
 ) string {
+	t.Helper()
+	innerPayload := buildInnerPayloadPriceOnly(feedID, priceMantissa)
+	solPayload := buildSolanaPayload(t, privKey, innerPayload)
+	return fmt.Sprintf(
+		`{"market":"%d","price":%q,"timestampMs":1774625883288,"pythSolanaPayload":%q}`,
+		feedID, jsonPrice, solPayload,
+	)
+}
+
+// signedBatchJSON builds a full {"data":[...]} response with price+exponent payloads.
+func signedBatchJSON(t *testing.T, items ...struct {
+	feedID        uint32
+	priceMantissa int64
+	exponent      int16
+},
+) (string, ed25519.PublicKey) {
 	t.Helper()
 	pub, priv, err := ed25519.GenerateKey(nil)
 	require.NoError(t, err)
@@ -74,13 +170,12 @@ func signedBatchJSON(t *testing.T, items ...struct {
 
 	parts := make([]string, len(items))
 	for i, item := range items {
-		parts[i] = signedItemJSON(t, priv, item.market, item.price)
+		parts[i] = signedItemJSON(t, priv, item.feedID, item.priceMantissa, item.exponent)
 	}
-	return `{"data":[` + strings.Join(parts, ",") + `]}`
+	return `{"data":[` + strings.Join(parts, ",") + `]}`, pub
 }
 
-// badSigBatchJSON returns a response where the signature is for a different
-// key than the one set in PYTH_PUB_KEY.
+// badSigBatchJSON returns a response where the envelope pubkey differs from PYTH_PUB_KEY.
 func badSigBatchJSON(t *testing.T) string {
 	t.Helper()
 	pub1, _, err := ed25519.GenerateKey(nil)
@@ -89,11 +184,11 @@ func badSigBatchJSON(t *testing.T) string {
 	require.NoError(t, err)
 	t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(pub1).String())
 
-	msg := []byte("pyth-test-msg-2694")
-	payload := buildSolanaPayload(t, priv2, msg)
+	innerPayload := buildInnerPayload(2694, 9726473, -8)
+	solPayload := buildSolanaPayload(t, priv2, innerPayload)
 	return fmt.Sprintf(
-		`{"data":[{"market":"2694","price":"0.097","timestampMs":1774625883288,"pythSolanaPayload":%q}]}`,
-		payload,
+		`{"data":[{"market":"2694","price":"0","timestampMs":1774625883288,"pythSolanaPayload":%q}]}`,
+		solPayload,
 	)
 }
 
@@ -140,8 +235,9 @@ func TestCreateURL(t *testing.T) {
 
 func TestParseResponse(t *testing.T) {
 	type item struct {
-		market string
-		price  string
+		feedID        uint32
+		priceMantissa int64
+		exponent      int16
 	}
 
 	testCases := []struct {
@@ -151,13 +247,12 @@ func TestParseResponse(t *testing.T) {
 		expected types.PriceResponse
 	}{
 		{
-			name: "valid single",
+			name: "valid single feed - mantissa 9726473 exp -8 = 0.09726473",
 			cps:  []types.ProviderTicker{feed2694},
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
-				return testutils.CreateResponseFromJSON(
-					signedBatchJSON(t, item{"2694", "0.097264730000000000"}),
-				)
+				body, _ := signedBatchJSON(t, item{2694, 9726473, -8})
+				return testutils.CreateResponseFromJSON(body)
 			},
 			expected: types.NewPriceResponse(
 				types.ResolvedPrices{
@@ -171,17 +266,37 @@ func TestParseResponse(t *testing.T) {
 			cps:  []types.ProviderTicker{feed2694, feed3032},
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
-				return testutils.CreateResponseFromJSON(
-					signedBatchJSON(t,
-						item{"2694", "0.097264730000000000"},
-						item{"3032", "3456.780000000000000000"},
-					),
+				body, _ := signedBatchJSON(t,
+					item{2694, 9726473, -8},
+					item{3032, 345678000000, -8},
 				)
+				return testutils.CreateResponseFromJSON(body)
 			},
 			expected: types.NewPriceResponse(
 				types.ResolvedPrices{
 					feed2694: {Value: big.NewFloat(0.09726473)},
 					feed3032: {Value: big.NewFloat(3456.78)},
+				},
+				types.UnResolvedPrices{},
+			),
+		},
+		{
+			name: "no exponent in payload - falls back to JSON price",
+			cps:  []types.ProviderTicker{feed2694},
+			response: func(t *testing.T) *http.Response {
+				t.Helper()
+				pub, priv, err := ed25519.GenerateKey(nil)
+				require.NoError(t, err)
+				t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(pub).String())
+
+				jsonBody := `{"data":[` +
+					signedItemJSONPriceOnly(t, priv, 2694, 10438000, "0.10438000") +
+					`]}`
+				return testutils.CreateResponseFromJSON(jsonBody)
+			},
+			expected: types.NewPriceResponse(
+				types.ResolvedPrices{
+					feed2694: {Value: big.NewFloat(0.10438)},
 				},
 				types.UnResolvedPrices{},
 			),
@@ -222,37 +337,16 @@ func TestParseResponse(t *testing.T) {
 			),
 		},
 		{
-			name: "bad price value",
-			cps:  []types.ProviderTicker{feed2694},
-			response: func(t *testing.T) *http.Response {
-				t.Helper()
-				return testutils.CreateResponseFromJSON(
-					signedBatchJSON(t, item{"2694", "$bad"}),
-				)
-			},
-			expected: types.NewPriceResponse(
-				types.ResolvedPrices{},
-				types.UnResolvedPrices{
-					feed2694: providertypes.UnresolvedResult{
-						ErrorWithCode: providertypes.NewErrorWithCode(
-							fmt.Errorf("parse error"), providertypes.ErrorAPIGeneral,
-						),
-					},
-				},
-			),
-		},
-		{
 			name: "feed not in batch response",
 			cps:  []types.ProviderTicker{feed2694, feed3032},
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
-				return testutils.CreateResponseFromJSON(
-					signedBatchJSON(t, item{"2694", "0.097"}),
-				)
+				body, _ := signedBatchJSON(t, item{2694, 9726473, -8})
+				return testutils.CreateResponseFromJSON(body)
 			},
 			expected: types.NewPriceResponse(
 				types.ResolvedPrices{
-					feed2694: {Value: big.NewFloat(0.097)},
+					feed2694: {Value: big.NewFloat(0.09726473)},
 				},
 				types.UnResolvedPrices{
 					feed3032: providertypes.UnresolvedResult{
@@ -281,17 +375,35 @@ func TestParseResponse(t *testing.T) {
 			),
 		},
 		{
-			name: "zero price",
+			name: "zero price mantissa with exponent produces unresolved",
 			cps:  []types.ProviderTicker{feed2694},
 			response: func(t *testing.T) *http.Response {
 				t.Helper()
-				return testutils.CreateResponseFromJSON(
-					signedBatchJSON(t, item{"2694", "0"}),
-				)
+				body, _ := signedBatchJSON(t, item{2694, 0, -8})
+				return testutils.CreateResponseFromJSON(body)
+			},
+			expected: types.NewPriceResponse(
+				types.ResolvedPrices{},
+				types.UnResolvedPrices{
+					feed2694: providertypes.UnresolvedResult{
+						ErrorWithCode: providertypes.NewErrorWithCode(
+							fmt.Errorf("zero/absent"), providertypes.ErrorAPIGeneral,
+						),
+					},
+				},
+			),
+		},
+		{
+			name: "positive exponent - mantissa 5 exp 2 = 500",
+			cps:  []types.ProviderTicker{feed2694},
+			response: func(t *testing.T) *http.Response {
+				t.Helper()
+				body, _ := signedBatchJSON(t, item{2694, 5, 2})
+				return testutils.CreateResponseFromJSON(body)
 			},
 			expected: types.NewPriceResponse(
 				types.ResolvedPrices{
-					feed2694: {Value: big.NewFloat(0)},
+					feed2694: {Value: big.NewFloat(500)},
 				},
 				types.UnResolvedPrices{},
 			),
@@ -327,25 +439,78 @@ func TestParseResponse(t *testing.T) {
 	}
 }
 
-func TestVerifyPythSolanaSignature(t *testing.T) {
-	t.Run("valid signature from generated key", func(t *testing.T) {
+func TestVerifyAndExtractFeed(t *testing.T) {
+	t.Run("valid single feed with exponent", func(t *testing.T) {
 		pub, priv, err := ed25519.GenerateKey(nil)
 		require.NoError(t, err)
 		t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(pub).String())
 
-		msg := []byte("hello-pyth")
-		payload := buildSolanaPayload(t, priv, msg)
-		require.NoError(t, pyth.VerifyPythSolanaSignature(payload))
+		inner := buildInnerPayload(2694, 9726473, -8)
+		payload := buildSolanaPayload(t, priv, inner)
+
+		feed, err := pyth.VerifyAndExtractFeed(payload, 2694)
+		require.NoError(t, err)
+		require.True(t, feed.HasPrice)
+		require.True(t, feed.HasExponent)
+		require.Equal(t, int64(9726473), feed.PriceMantissa)
+		require.Equal(t, int16(-8), feed.Exponent)
+
+		price, err := feed.ComputePrice()
+		require.NoError(t, err)
+		expected := big.NewFloat(0.09726473)
+		require.Equal(t, expected.SetPrec(18), price.SetPrec(18))
 	})
 
-	t.Run("valid production sample payload", func(t *testing.T) {
+	t.Run("payload without exponent (price + feedUpdateTimestamp only)", func(t *testing.T) {
 		pub, priv, err := ed25519.GenerateKey(nil)
 		require.NoError(t, err)
 		t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(pub).String())
 
-		msg := []byte("production-like-price-data-for-feed-2694")
-		payload := buildSolanaPayload(t, priv, msg)
-		require.NoError(t, pyth.VerifyPythSolanaSignature(payload))
+		inner := buildInnerPayloadPriceOnly(2694, 10438000)
+		payload := buildSolanaPayload(t, priv, inner)
+
+		feed, err := pyth.VerifyAndExtractFeed(payload, 2694)
+		require.NoError(t, err)
+		require.True(t, feed.HasPrice)
+		require.False(t, feed.HasExponent)
+		require.True(t, feed.HasTimestamp)
+		require.Equal(t, int64(10438000), feed.PriceMantissa)
+		require.Equal(t, uint32(2694), feed.FeedID)
+	})
+
+	t.Run("real production payload", func(t *testing.T) {
+		// Actual payload from production Pyth Lazer for feed 2694 (WTI/USD).
+		// Pubkey (base58): AbGSbqM2M5FeyPNqwiMkGBCqPb63HhR7RK9dBjxJ4mF1
+		prodPayload := "uQEagpolDOQCDv+Fd6/CBw7HBUGPxzSY+41jnaBoGCA+eX+fqgdMmWAVMOBTmO23hWBiV0H7xIPReVnaAE9lVt4B0AeA78H0gMVhWvP7Zz1CKH6ZPan7w1BrbkHfoylQggwubCYAddPHk4AM8BtUTgYAAwGGCgAAAgBwRZ8AAAAAAAwBgAzwG1ROBgA="
+
+		// The pubkey embedded in the envelope (hex):
+		// 80efc1f480c5615af3fb673d42287e993da9fbc3506b6e41dfa32950820c2e6c
+		pubKeyBytes, err := base64.StdEncoding.DecodeString(prodPayload)
+		require.NoError(t, err)
+		embeddedPubKey := pubKeyBytes[68:100]
+		t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(embeddedPubKey).String())
+
+		feed, err := pyth.VerifyAndExtractFeed(prodPayload, 2694)
+		require.NoError(t, err)
+		require.Equal(t, uint32(2694), feed.FeedID)
+		require.True(t, feed.HasPrice)
+		require.Equal(t, int64(10438000), feed.PriceMantissa)
+		require.False(t, feed.HasExponent)
+		require.True(t, feed.HasTimestamp)
+		require.Equal(t, uint64(1774973013200000), feed.TimestampUs)
+	})
+
+	t.Run("feed not found in payload", func(t *testing.T) {
+		pub, priv, err := ed25519.GenerateKey(nil)
+		require.NoError(t, err)
+		t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(pub).String())
+
+		inner := buildInnerPayload(2694, 9726473, -8)
+		payload := buildSolanaPayload(t, priv, inner)
+
+		_, err = pyth.VerifyAndExtractFeed(payload, 9999)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "feed 9999 not found")
 	})
 
 	t.Run("wrong public key", func(t *testing.T) {
@@ -355,46 +520,47 @@ func TestVerifyPythSolanaSignature(t *testing.T) {
 		require.NoError(t, err)
 		t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(pub1).String())
 
-		msg := []byte("test-msg")
-		payload := buildSolanaPayload(t, priv2, msg)
-		err = pyth.VerifyPythSolanaSignature(payload)
+		inner := buildInnerPayload(2694, 9726473, -8)
+		payload := buildSolanaPayload(t, priv2, inner)
+
+		_, err = pyth.VerifyAndExtractFeed(payload, 2694)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "public key mismatch")
 	})
 
-	t.Run("tampered message", func(t *testing.T) {
+	t.Run("tampered payload", func(t *testing.T) {
 		pub, priv, err := ed25519.GenerateKey(nil)
 		require.NoError(t, err)
 		t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(pub).String())
 
-		msg := []byte("original-msg")
-		sig := ed25519.Sign(priv, msg)
+		original := buildInnerPayload(2694, 9726473, -8)
+		sig := ed25519.Sign(priv, original)
 
-		tamperedMsg := []byte("tampered-msg")
-		require.LessOrEqual(t, len(tamperedMsg), math.MaxUint16)
-		buf := make([]byte, 4+64+32+2+len(tamperedMsg))
+		tampered := buildInnerPayload(2694, 99999999, -8)
+		require.LessOrEqual(t, len(tampered), math.MaxUint16)
+		buf := make([]byte, 4+64+32+2+len(tampered))
 		binary.LittleEndian.PutUint32(buf[0:4], pyth.SolanaFormatMagic)
 		copy(buf[4:68], sig)
 		copy(buf[68:100], pub)
-		binary.LittleEndian.PutUint16(buf[100:102], uint16(len(tamperedMsg))) //nolint:gosec // bounded above
-		copy(buf[102:], tamperedMsg)
+		binary.LittleEndian.PutUint16(buf[100:102], uint16(len(tampered))) //nolint:gosec // bounded above
+		copy(buf[102:], tampered)
 
 		payload := base64.StdEncoding.EncodeToString(buf)
-		err = pyth.VerifyPythSolanaSignature(payload)
+		_, err = pyth.VerifyAndExtractFeed(payload, 2694)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "ed25519 signature verification failed")
 	})
 
 	t.Run("env var not set", func(t *testing.T) {
 		t.Setenv(pyth.PythPubKeyEnv, "")
-		err := pyth.VerifyPythSolanaSignature("dGVzdA==")
+		_, err := pyth.VerifyAndExtractFeed("dGVzdA==", 2694)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "PYTH_PUB_KEY")
 	})
 
 	t.Run("invalid base64", func(t *testing.T) {
 		t.Setenv(pyth.PythPubKeyEnv, "11111111111111111111111111111111")
-		err := pyth.VerifyPythSolanaSignature("!!!not-base64!!!")
+		_, err := pyth.VerifyAndExtractFeed("!!!not-base64!!!", 2694)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "base64")
 	})
@@ -402,12 +568,12 @@ func TestVerifyPythSolanaSignature(t *testing.T) {
 	t.Run("payload too short", func(t *testing.T) {
 		t.Setenv(pyth.PythPubKeyEnv, "11111111111111111111111111111111")
 		short := base64.StdEncoding.EncodeToString([]byte("tooshort"))
-		err := pyth.VerifyPythSolanaSignature(short)
+		_, err := pyth.VerifyAndExtractFeed(short, 2694)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "too short")
 	})
 
-	t.Run("wrong magic", func(t *testing.T) {
+	t.Run("wrong envelope magic", func(t *testing.T) {
 		pub, _, err := ed25519.GenerateKey(nil)
 		require.NoError(t, err)
 		t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(pub).String())
@@ -415,8 +581,39 @@ func TestVerifyPythSolanaSignature(t *testing.T) {
 		buf := make([]byte, 102)
 		binary.LittleEndian.PutUint32(buf[0:4], 0xDEADBEEF)
 		payload := base64.StdEncoding.EncodeToString(buf)
-		err = pyth.VerifyPythSolanaSignature(payload)
+		_, err = pyth.VerifyAndExtractFeed(payload, 2694)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "invalid magic")
+		require.Contains(t, err.Error(), "invalid envelope magic")
+	})
+
+	t.Run("negative price mantissa", func(t *testing.T) {
+		pub, priv, err := ed25519.GenerateKey(nil)
+		require.NoError(t, err)
+		t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(pub).String())
+
+		inner := buildInnerPayload(2694, -5000000, -5)
+		payload := buildSolanaPayload(t, priv, inner)
+
+		feed, err := pyth.VerifyAndExtractFeed(payload, 2694)
+		require.NoError(t, err)
+		price, err := feed.ComputePrice()
+		require.NoError(t, err)
+		expected := big.NewFloat(-50.0)
+		require.Equal(t, expected.SetPrec(18), price.SetPrec(18))
+	})
+
+	t.Run("zero price mantissa", func(t *testing.T) {
+		pub, priv, err := ed25519.GenerateKey(nil)
+		require.NoError(t, err)
+		t.Setenv(pyth.PythPubKeyEnv, solana.PublicKeyFromBytes(pub).String())
+
+		inner := buildInnerPayload(2694, 0, -8)
+		payload := buildSolanaPayload(t, priv, inner)
+
+		feed, err := pyth.VerifyAndExtractFeed(payload, 2694)
+		require.NoError(t, err)
+		_, err = feed.ComputePrice()
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "zero/absent")
 	})
 }
