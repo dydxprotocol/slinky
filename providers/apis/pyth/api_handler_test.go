@@ -38,7 +38,7 @@ func buildInnerPayload(feedID uint32, priceMantissa int64, exponent int16) []byt
 
 	binary.LittleEndian.PutUint32(buf[off:], pyth.PayloadFormatMagic)
 	off += 4
-	binary.LittleEndian.PutUint64(buf[off:], uint64(time.Now().UnixMicro()))
+	binary.LittleEndian.PutUint64(buf[off:], uint64(time.Now().UnixMicro())) //nolint:gosec // test only, always positive
 	off += 8
 	buf[off] = 3 // channel_id: FIXED_RATE_200
 	off++
@@ -52,12 +52,12 @@ func buildInnerPayload(feedID uint32, priceMantissa int64, exponent int16) []byt
 
 	buf[off] = 0 // propPrice tag
 	off++
-	binary.LittleEndian.PutUint64(buf[off:], uint64(priceMantissa))
+	binary.LittleEndian.PutUint64(buf[off:], uint64(priceMantissa)) //nolint:gosec // reinterpret signed as unsigned bits
 	off += 8
 
 	buf[off] = 4 // propExponent tag
 	off++
-	binary.LittleEndian.PutUint16(buf[off:], uint16(exponent))
+	binary.LittleEndian.PutUint16(buf[off:], uint16(exponent)) //nolint:gosec // reinterpret signed as unsigned bits
 
 	return buf
 }
@@ -74,7 +74,7 @@ func buildInnerPayloadPriceOnly(feedID uint32, priceMantissa int64) []byte {
 
 	binary.LittleEndian.PutUint32(buf[off:], pyth.PayloadFormatMagic)
 	off += 4
-	ts := uint64(time.Now().UnixMicro())
+	ts := uint64(time.Now().UnixMicro()) //nolint:gosec // test only, always positive
 	binary.LittleEndian.PutUint64(buf[off:], ts)
 	off += 8
 	buf[off] = 3 // channel_id
@@ -89,7 +89,7 @@ func buildInnerPayloadPriceOnly(feedID uint32, priceMantissa int64) []byte {
 
 	buf[off] = 0 // propPrice tag
 	off++
-	binary.LittleEndian.PutUint64(buf[off:], uint64(priceMantissa))
+	binary.LittleEndian.PutUint64(buf[off:], uint64(priceMantissa)) //nolint:gosec // reinterpret signed as unsigned bits
 	off += 8
 
 	buf[off] = 12 // propFeedUpdateTimestamp tag

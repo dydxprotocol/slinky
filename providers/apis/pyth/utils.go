@@ -37,18 +37,18 @@ const (
 
 // PriceFeedProperty discriminant values from the Pyth Lazer protocol.
 const (
-	propPrice              uint8 = 0
-	propBestBidPrice       uint8 = 1
-	propBestAskPrice       uint8 = 2
-	propPublisherCount     uint8 = 3
-	propExponent           uint8 = 4
-	propConfidence         uint8 = 5
-	propFundingRate        uint8 = 6
+	propPrice               uint8 = 0
+	propBestBidPrice        uint8 = 1
+	propBestAskPrice        uint8 = 2
+	propPublisherCount      uint8 = 3
+	propExponent            uint8 = 4
+	propConfidence          uint8 = 5
+	propFundingRate         uint8 = 6
 	propFundingTimestamp    uint8 = 7
 	propFundingRateInterval uint8 = 8
-	propMarketSession      uint8 = 9
-	propEmaPrice           uint8 = 10
-	propEmaConfidence      uint8 = 11
+	propMarketSession       uint8 = 9
+	propEmaPrice            uint8 = 10
+	propEmaConfidence       uint8 = 11
 	propFeedUpdateTimestamp uint8 = 12
 )
 
@@ -84,7 +84,7 @@ type ParsedFeedPrice struct {
 	Exponent      int16
 	HasExponent   bool
 	TimestampUs   uint64
-	HasTimestamp   bool
+	HasTimestamp  bool
 }
 
 // ComputePrice returns mantissa * 10^exponent as a *big.Float.
@@ -253,7 +253,7 @@ func parseProperty(msg []byte, off int, tag uint8, feed *ParsedFeedPrice) (int, 
 		if off+8 > len(msg) {
 			return 0, fmt.Errorf("need 8 bytes for i64 property, have %d", len(msg)-off)
 		}
-		val := int64(binary.LittleEndian.Uint64(msg[off : off+8]))
+		val := int64(binary.LittleEndian.Uint64(msg[off : off+8])) //nolint:gosec // reinterpreting unsigned bits as signed per Pyth wire format
 		if tag == propPrice {
 			feed.PriceMantissa = val
 			feed.HasPrice = true
@@ -270,7 +270,7 @@ func parseProperty(msg []byte, off int, tag uint8, feed *ParsedFeedPrice) (int, 
 		if off+2 > len(msg) {
 			return 0, fmt.Errorf("need 2 bytes for i16 property, have %d", len(msg)-off)
 		}
-		feed.Exponent = int16(binary.LittleEndian.Uint16(msg[off : off+2]))
+		feed.Exponent = int16(binary.LittleEndian.Uint16(msg[off : off+2])) //nolint:gosec // reinterpreting unsigned bits as signed per Pyth wire format
 		feed.HasExponent = true
 		return off + 2, nil
 

@@ -137,7 +137,7 @@ func (h *APIHandler) ParseResponse(
 			continue
 		}
 
-		feed, err := VerifyAndExtractFeed(item.PythSolanaPayload, uint32(feedID)) //nolint:gosec // bounded by ParseUint 32-bit
+		feed, err := VerifyAndExtractFeed(item.PythSolanaPayload, uint32(feedID))
 		if err != nil {
 			unresolved[ticker] = providertypes.UnresolvedResult{
 				ErrorWithCode: providertypes.NewErrorWithCode(

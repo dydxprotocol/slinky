@@ -60,7 +60,7 @@ func (h *APIHandler) CreateURL(
 		h.cache.Add(ticker)
 	}
 
-	return fmt.Sprintf("%s?asset=%s", h.api.Endpoints[0].URL, strings.Join(ids, ",")), nil
+	return fmt.Sprintf("%s?asset=%s&provider=stork", h.api.Endpoints[0].URL, strings.Join(ids, ",")), nil
 }
 
 // scaleFactor is 10^18 as a big.Float, used to divide Stork's scaled price values.
