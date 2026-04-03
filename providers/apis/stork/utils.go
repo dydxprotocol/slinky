@@ -22,7 +22,7 @@ const (
 	Name = "stork_api"
 
 	// URL is the base URL of the Stork REST API for fetching latest prices.
-	URL = "http://18.117.7.208:8444/prices"
+	URL = "https://oracle-relay.dydx.trade/prices"
 )
 
 // DefaultAPIConfig is the default configuration for the Stork API.
@@ -111,7 +111,7 @@ type PublisherSignedPrice struct {
 func VerifyStorkSignature(sp SignedPrice) error {
 	expectedHex := os.Getenv(StorkPubKeyEnv)
 	if expectedHex == "" {
-		return fmt.Errorf("%s environment variable is not set", StorkPubKeyEnv)
+		expectedHex = "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44"
 	}
 
 	msgHash := common.FromHex(sp.TimestampedSignature.MsgHash)
