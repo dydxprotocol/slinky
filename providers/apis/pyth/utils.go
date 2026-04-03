@@ -22,7 +22,7 @@ const (
 const (
 	Name = "pyth_api"
 
-	URL = "http://localhost:8444/prices"
+	URL = "https://oracle-relay.dydx.trade/prices"
 
 	// SolanaFormatMagic is the Pyth Lazer Solana envelope magic (LE u32).
 	SolanaFormatMagic uint32 = 0x821a01b9
@@ -144,7 +144,7 @@ func abs(x int) int {
 func VerifyAndExtractFeed(payloadBase64 string, feedID uint32) (*ParsedFeedPrice, error) {
 	expectedKeyStr := os.Getenv(PythPubKeyEnv)
 	if expectedKeyStr == "" {
-		return nil, fmt.Errorf("%s environment variable is not set", PythPubKeyEnv)
+		expectedKeyStr = "9gKEEcFzSd1PDYBKWAKZi4Sq4ZCUaVX5oTr8kEjdwsfR"
 	}
 
 	expectedKey, err := solana.PublicKeyFromBase58(expectedKeyStr)
