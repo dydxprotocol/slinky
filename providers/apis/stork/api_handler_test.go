@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
 
@@ -29,7 +30,7 @@ var (
 )
 
 // signedItemJSON returns a single PriceResponse item JSON with a valid ECDSA
-// signature. The caller must have already set STORK_PUB_KEY via t.Setenv.
+// signature from key. The handler under test must trust the key's address.
 func signedItemJSON(t *testing.T, key *ecdsa.PrivateKey, market, price string) string {
 	t.Helper()
 	addr := ethcrypto.PubkeyToAddress(key.PublicKey)
@@ -139,7 +140,7 @@ func TestCreateURL(t *testing.T) {
 			cps: []types.ProviderTicker{
 				xagusd,
 			},
-			url:         fmt.Sprintf("%s?asset=%s", stork.URL, "XAGUSD"),
+			url:         fmt.Sprintf("%s?asset=%s&provider=stork", stork.URL, "XAGUSD"),
 			expectedErr: false,
 		},
 		{
@@ -148,7 +149,7 @@ func TestCreateURL(t *testing.T) {
 				xagusd,
 				spxusd,
 			},
-			url:         fmt.Sprintf("%s?asset=%s", stork.URL, "XAGUSD,SPXUSD"),
+			url:         fmt.Sprintf("%s?asset=%s&provider=stork", stork.URL, "XAGUSD,SPXUSD"),
 			expectedErr: false,
 		},
 	}
@@ -368,6 +369,9 @@ func TestParseResponse(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// The response helpers set STORK_PUB_KEY, which the handler reads at construction.
+			httpResp := tc.response(t)
+
 			h, err := stork.NewAPIHandler(stork.DefaultAPIConfig)
 			require.NoError(t, err)
 
@@ -375,7 +379,7 @@ func TestParseResponse(t *testing.T) {
 			require.NoError(t, err)
 
 			now := time.Now()
-			resp := h.ParseResponse(tc.cps, tc.response(t))
+			resp := h.ParseResponse(tc.cps, httpResp)
 
 			require.Len(t, resp.Resolved, len(tc.expected.Resolved))
 			require.Len(t, resp.UnResolved, len(tc.expected.UnResolved))
@@ -395,132 +399,125 @@ func TestParseResponse(t *testing.T) {
 	}
 }
 
+// productionSignedPrice is a real XAU-USD aggregator price signed by
+// 0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44.
+func productionSignedPrice() stork.SignedPrice {
+	return stork.SignedPrice{
+		PublicKey:      "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
+		EncodedAssetID: "0xe21c86d8b6a127bfef214d88fdb0c279e55d27dd8c443733e46c8d3de3c98cd6",
+		Price:          "5176579999999999000000",
+		TimestampedSignature: stork.TimestampedSignature{
+			Signature: stork.EvmSignature{
+				R: "0x5b3ef6c1e990d8f8761633386eb1bbaf2c584b048daef58fbb8927936f51def5",
+				S: "0x2d91200de4f245d846a8bf54c3e51b78dc03f81814dba74765dcc602f5103c32",
+				V: "0x1c",
+			},
+			Timestamp: 1773266051641470000,
+			MsgHash:   "0xf5a5d4cf42bf421f48d00a8eb4f0752cd1079061383972b99c57b64a59cce21d",
+		},
+		PublisherMerkleRoot: "0x7e7d41d87fedc065729e40eb6d51e62580dcb5f614c8e50dee27ae3eff70fb8d",
+		CalculationAlg: stork.CalculationAlg{
+			Type:     "median",
+			Version:  "v1",
+			Checksum: "9be7e9f9ed459417d96112a7467bd0b27575a2c7847195c68f805b70ce1795ba",
+		},
+	}
+}
+
+// generatedSignedPrice signs msg with a fresh key and returns the signed price
+// together with the signer's address.
+func generatedSignedPrice(t *testing.T, msg string) (stork.SignedPrice, common.Address) {
+	t.Helper()
+	key, err := ethcrypto.GenerateKey()
+	require.NoError(t, err)
+	addr := ethcrypto.PubkeyToAddress(key.PublicKey)
+
+	msgHash := ethcrypto.Keccak256([]byte(msg))
+	prefix := []byte("\x19Ethereum Signed Message:\n32")
+	digest := ethcrypto.Keccak256(append(prefix, msgHash...))
+	sig, err := ethcrypto.Sign(digest, key)
+	require.NoError(t, err)
+
+	return stork.SignedPrice{
+		PublicKey: addr.Hex(),
+		TimestampedSignature: stork.TimestampedSignature{
+			Signature: stork.EvmSignature{
+				R: "0x" + hex.EncodeToString(sig[0:32]),
+				S: "0x" + hex.EncodeToString(sig[32:64]),
+				V: fmt.Sprintf("0x%02x", sig[64]+27),
+			},
+			MsgHash: "0x" + hex.EncodeToString(msgHash),
+		},
+	}, addr
+}
+
+func addrs(hexes ...string) []common.Address {
+	out := make([]common.Address, len(hexes))
+	for i, h := range hexes {
+		out[i] = common.HexToAddress(h)
+	}
+	return out
+}
+
 func TestVerifyStorkSignature(t *testing.T) {
 	t.Run("valid signature from generated key", func(t *testing.T) {
-		key, err := ethcrypto.GenerateKey()
-		require.NoError(t, err)
-		addr := ethcrypto.PubkeyToAddress(key.PublicKey)
-		t.Setenv(stork.StorkPubKeyEnv, addr.Hex())
-
-		msgHash := ethcrypto.Keccak256([]byte("verify-test"))
-		prefix := []byte("\x19Ethereum Signed Message:\n32")
-		digest := ethcrypto.Keccak256(append(prefix, msgHash...))
-		sig, err := ethcrypto.Sign(digest, key)
-		require.NoError(t, err)
-
-		sp := stork.SignedPrice{
-			PublicKey: addr.Hex(),
-			TimestampedSignature: stork.TimestampedSignature{
-				Signature: stork.EvmSignature{
-					R: "0x" + hex.EncodeToString(sig[0:32]),
-					S: "0x" + hex.EncodeToString(sig[32:64]),
-					V: fmt.Sprintf("0x%02x", sig[64]+27),
-				},
-				MsgHash: "0x" + hex.EncodeToString(msgHash),
-			},
-		}
-		require.NoError(t, stork.VerifyStorkSignature(sp))
+		sp, addr := generatedSignedPrice(t, "verify-test")
+		require.NoError(t, stork.VerifyStorkSignature(sp, []common.Address{addr}))
 	})
 
 	t.Run("valid production signature for XAU-USD", func(t *testing.T) {
-		t.Setenv(stork.StorkPubKeyEnv, "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44")
-
-		sp := stork.SignedPrice{
-			PublicKey:      "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
-			EncodedAssetID: "0xe21c86d8b6a127bfef214d88fdb0c279e55d27dd8c443733e46c8d3de3c98cd6",
-			Price:          "5176579999999999000000",
-			TimestampedSignature: stork.TimestampedSignature{
-				Signature: stork.EvmSignature{
-					R: "0x5b3ef6c1e990d8f8761633386eb1bbaf2c584b048daef58fbb8927936f51def5",
-					S: "0x2d91200de4f245d846a8bf54c3e51b78dc03f81814dba74765dcc602f5103c32",
-					V: "0x1c",
-				},
-				Timestamp: 1773266051641470000,
-				MsgHash:   "0xf5a5d4cf42bf421f48d00a8eb4f0752cd1079061383972b99c57b64a59cce21d",
-			},
-			PublisherMerkleRoot: "0x7e7d41d87fedc065729e40eb6d51e62580dcb5f614c8e50dee27ae3eff70fb8d",
-			CalculationAlg: stork.CalculationAlg{
-				Type:     "median",
-				Version:  "v1",
-				Checksum: "9be7e9f9ed459417d96112a7467bd0b27575a2c7847195c68f805b70ce1795ba",
-			},
-		}
-		require.NoError(t, stork.VerifyStorkSignature(sp))
+		signers := addrs("0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44")
+		require.NoError(t, stork.VerifyStorkSignature(productionSignedPrice(), signers))
 	})
 
-	t.Run("production signature with wrong public key", func(t *testing.T) {
-		t.Setenv(stork.StorkPubKeyEnv, "0x0000000000000000000000000000000000000001")
+	t.Run("signer matches any entry in the list", func(t *testing.T) {
+		signers := addrs(
+			"0x0000000000000000000000000000000000000001",
+			"0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
+			"0x0000000000000000000000000000000000000002",
+		)
+		require.NoError(t, stork.VerifyStorkSignature(productionSignedPrice(), signers))
+	})
 
-		sp := stork.SignedPrice{
-			PublicKey:      "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
-			EncodedAssetID: "0xe21c86d8b6a127bfef214d88fdb0c279e55d27dd8c443733e46c8d3de3c98cd6",
-			Price:          "5176579999999999000000",
-			TimestampedSignature: stork.TimestampedSignature{
-				Signature: stork.EvmSignature{
-					R: "0x5b3ef6c1e990d8f8761633386eb1bbaf2c584b048daef58fbb8927936f51def5",
-					S: "0x2d91200de4f245d846a8bf54c3e51b78dc03f81814dba74765dcc602f5103c32",
-					V: "0x1c",
-				},
-				Timestamp: 1773266051641470000,
-				MsgHash:   "0xf5a5d4cf42bf421f48d00a8eb4f0752cd1079061383972b99c57b64a59cce21d",
-			},
-			PublisherMerkleRoot: "0x7e7d41d87fedc065729e40eb6d51e62580dcb5f614c8e50dee27ae3eff70fb8d",
-			CalculationAlg: stork.CalculationAlg{
-				Type:     "median",
-				Version:  "v1",
-				Checksum: "9be7e9f9ed459417d96112a7467bd0b27575a2c7847195c68f805b70ce1795ba",
-			},
-		}
-		err := stork.VerifyStorkSignature(sp)
+	t.Run("signer matches last entry in the list", func(t *testing.T) {
+		signers := addrs(
+			"0x0000000000000000000000000000000000000001",
+			"0x0000000000000000000000000000000000000002",
+			"0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
+		)
+		require.NoError(t, stork.VerifyStorkSignature(productionSignedPrice(), signers))
+	})
+
+	t.Run("production signature verifies against defaults", func(t *testing.T) {
+		require.NoError(t, stork.VerifyStorkSignature(productionSignedPrice(), stork.DefaultSignerAddresses))
+	})
+
+	t.Run("production signature with wrong signer list", func(t *testing.T) {
+		signers := addrs(
+			"0x0000000000000000000000000000000000000001",
+			"0x0000000000000000000000000000000000000002",
+		)
+		err := stork.VerifyStorkSignature(productionSignedPrice(), signers)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "signature mismatch")
 	})
 
 	t.Run("wrong public key", func(t *testing.T) {
-		t.Setenv(stork.StorkPubKeyEnv, "0x0000000000000000000000000000000000000001")
-
-		key, err := ethcrypto.GenerateKey()
-		require.NoError(t, err)
-		msgHash := ethcrypto.Keccak256([]byte("verify-test"))
-		prefix := []byte("\x19Ethereum Signed Message:\n32")
-		digest := ethcrypto.Keccak256(append(prefix, msgHash...))
-		sig, err := ethcrypto.Sign(digest, key)
-		require.NoError(t, err)
-
-		sp := stork.SignedPrice{
-			PublicKey: "0x0000000000000000000000000000000000000001",
-			TimestampedSignature: stork.TimestampedSignature{
-				Signature: stork.EvmSignature{
-					R: "0x" + hex.EncodeToString(sig[0:32]),
-					S: "0x" + hex.EncodeToString(sig[32:64]),
-					V: fmt.Sprintf("0x%02x", sig[64]+27),
-				},
-				MsgHash: "0x" + hex.EncodeToString(msgHash),
-			},
-		}
-		err = stork.VerifyStorkSignature(sp)
+		sp, _ := generatedSignedPrice(t, "verify-test")
+		sp.PublicKey = "0x0000000000000000000000000000000000000001"
+		err := stork.VerifyStorkSignature(sp, addrs("0x0000000000000000000000000000000000000001"))
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "signature mismatch")
 	})
 
-	t.Run("env var not set", func(t *testing.T) {
-		t.Setenv(stork.StorkPubKeyEnv, "")
-
-		sp := stork.SignedPrice{
-			PublicKey: "0x0000000000000000000000000000000000000001",
-			TimestampedSignature: stork.TimestampedSignature{
-				Signature: stork.EvmSignature{R: "0xaa", S: "0xbb", V: "0x1c"},
-				MsgHash:   "0xdead",
-			},
-		}
-		err := stork.VerifyStorkSignature(sp)
+	t.Run("no signers configured", func(t *testing.T) {
+		sp, _ := generatedSignedPrice(t, "verify-test")
+		err := stork.VerifyStorkSignature(sp, nil)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "STORK_PUB_KEY")
+		require.Contains(t, err.Error(), "no trusted signer addresses")
 	})
 
 	t.Run("invalid msg_hash length", func(t *testing.T) {
-		t.Setenv(stork.StorkPubKeyEnv, "0x0000000000000000000000000000000000000001")
-
 		sp := stork.SignedPrice{
 			PublicKey: "0x0000000000000000000000000000000000000001",
 			TimestampedSignature: stork.TimestampedSignature{
@@ -528,8 +525,144 @@ func TestVerifyStorkSignature(t *testing.T) {
 				MsgHash:   "0xdead",
 			},
 		}
-		err := stork.VerifyStorkSignature(sp)
+		err := stork.VerifyStorkSignature(sp, addrs("0x0000000000000000000000000000000000000001"))
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "invalid msg_hash length")
+	})
+}
+
+func TestParseSignerAddresses(t *testing.T) {
+	testCases := []struct {
+		name        string
+		raw         string
+		expected    []common.Address
+		expectedErr string
+	}{
+		{
+			name:     "single address",
+			raw:      "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
+			expected: addrs("0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44"),
+		},
+		{
+			name: "multiple addresses with whitespace",
+			raw:  " 0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44 ,0x0bb53E0d5E89778DCD13C2720667D292368dD053 ",
+			expected: addrs(
+				"0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
+				"0x0bb53E0d5E89778DCD13C2720667D292368dD053",
+			),
+		},
+		{
+			name:     "lowercase without prefix",
+			raw:      "0a803f9b1cce32e2773e0d2e98b37e0775ca5d44",
+			expected: addrs("0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44"),
+		},
+		{
+			name:        "trailing comma",
+			raw:         "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44,",
+			expectedErr: "invalid signer address",
+		},
+		{
+			name:        "leading comma",
+			raw:         ",0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
+			expectedErr: "invalid signer address",
+		},
+		{
+			name:        "double comma",
+			raw:         "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44,,0x0bb53E0d5E89778DCD13C2720667D292368dD053",
+			expectedErr: "invalid signer address",
+		},
+		{
+			name:        "malformed entry",
+			raw:         "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44,not-an-address",
+			expectedErr: "invalid signer address",
+		},
+		{
+			name:        "empty",
+			raw:         "",
+			expectedErr: "invalid signer address",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := stork.ParseSignerAddresses(tc.raw)
+			if tc.expectedErr != "" {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.expectedErr)
+				return
+			}
+			require.NoError(t, err)
+			require.Equal(t, tc.expected, got)
+		})
+	}
+}
+
+func TestSignerAddressesFromEnv(t *testing.T) {
+	t.Run("unset uses defaults", func(t *testing.T) {
+		t.Setenv(stork.StorkPubKeyEnv, "")
+		got, err := stork.SignerAddressesFromEnv()
+		require.NoError(t, err)
+		require.Equal(t, stork.DefaultSignerAddresses, got)
+	})
+
+	t.Run("defaults are copied", func(t *testing.T) {
+		t.Setenv(stork.StorkPubKeyEnv, "")
+		got, err := stork.SignerAddressesFromEnv()
+		require.NoError(t, err)
+
+		got[0] = common.HexToAddress("0x0000000000000000000000000000000000000001")
+		require.NotEqual(t, got[0], stork.DefaultSignerAddresses[0])
+	})
+
+	t.Run("whitespace only uses defaults", func(t *testing.T) {
+		t.Setenv(stork.StorkPubKeyEnv, "   ")
+		got, err := stork.SignerAddressesFromEnv()
+		require.NoError(t, err)
+		require.Equal(t, stork.DefaultSignerAddresses, got)
+	})
+
+	t.Run("set overrides defaults", func(t *testing.T) {
+		t.Setenv(stork.StorkPubKeyEnv, "0x0000000000000000000000000000000000000001,0x0000000000000000000000000000000000000002")
+		got, err := stork.SignerAddressesFromEnv()
+		require.NoError(t, err)
+		require.Equal(t, addrs(
+			"0x0000000000000000000000000000000000000001",
+			"0x0000000000000000000000000000000000000002",
+		), got)
+	})
+
+	t.Run("invalid value is an error", func(t *testing.T) {
+		t.Setenv(stork.StorkPubKeyEnv, "0x0000000000000000000000000000000000000001,bogus")
+		_, err := stork.SignerAddressesFromEnv()
+		require.Error(t, err)
+		require.Contains(t, err.Error(), stork.StorkPubKeyEnv)
+	})
+}
+
+func TestNewAPIHandlerSignerConfig(t *testing.T) {
+	t.Run("invalid signer list fails construction", func(t *testing.T) {
+		t.Setenv(stork.StorkPubKeyEnv, "bogus")
+		_, err := stork.NewAPIHandler(stork.DefaultAPIConfig)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), stork.StorkPubKeyEnv)
+	})
+
+	t.Run("signers are read once at construction", func(t *testing.T) {
+		key, err := ethcrypto.GenerateKey()
+		require.NoError(t, err)
+		addr := ethcrypto.PubkeyToAddress(key.PublicKey)
+
+		t.Setenv(stork.StorkPubKeyEnv, "0x0000000000000000000000000000000000000001")
+		h, err := stork.NewAPIHandler(stork.DefaultAPIConfig)
+		require.NoError(t, err)
+
+		// Changing the env after construction must not affect the handler.
+		t.Setenv(stork.StorkPubKeyEnv, addr.Hex())
+
+		body := `{"data":[` + signedItemJSON(t, key, "XAGUSD", "30500000000000000000") + `]}`
+		resp := h.ParseResponse([]types.ProviderTicker{xagusd}, testutils.CreateResponseFromJSON(body))
+		require.Empty(t, resp.Resolved)
+		require.Contains(t, resp.UnResolved, xagusd)
+		require.Contains(t, resp.UnResolved[xagusd].Error(), "signature mismatch")
 	})
 }
