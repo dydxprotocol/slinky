@@ -30,7 +30,7 @@ var (
 )
 
 // signedItemJSON returns a single PriceResponse item JSON with a valid ECDSA
-// signature. The caller must have already set STORK_PUB_KEY via t.Setenv.
+// signature from key. The handler under test must trust the key's address.
 func signedItemJSON(t *testing.T, key *ecdsa.PrivateKey, market, price string) string {
 	t.Helper()
 	addr := ethcrypto.PubkeyToAddress(key.PublicKey)
@@ -479,6 +479,15 @@ func TestVerifyStorkSignature(t *testing.T) {
 		require.NoError(t, stork.VerifyStorkSignature(productionSignedPrice(), signers))
 	})
 
+	t.Run("signer matches last entry in the list", func(t *testing.T) {
+		signers := addrs(
+			"0x0000000000000000000000000000000000000001",
+			"0x0000000000000000000000000000000000000002",
+			"0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
+		)
+		require.NoError(t, stork.VerifyStorkSignature(productionSignedPrice(), signers))
+	})
+
 	t.Run("production signature verifies against defaults", func(t *testing.T) {
 		require.NoError(t, stork.VerifyStorkSignature(productionSignedPrice(), stork.DefaultSignerAddresses))
 	})
@@ -553,6 +562,16 @@ func TestParseSignerAddresses(t *testing.T) {
 			expectedErr: "invalid signer address",
 		},
 		{
+			name:        "leading comma",
+			raw:         ",0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44",
+			expectedErr: "invalid signer address",
+		},
+		{
+			name:        "double comma",
+			raw:         "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44,,0x0bb53E0d5E89778DCD13C2720667D292368dD053",
+			expectedErr: "invalid signer address",
+		},
+		{
 			name:        "malformed entry",
 			raw:         "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44,not-an-address",
 			expectedErr: "invalid signer address",
@@ -584,6 +603,15 @@ func TestSignerAddressesFromEnv(t *testing.T) {
 		got, err := stork.SignerAddressesFromEnv()
 		require.NoError(t, err)
 		require.Equal(t, stork.DefaultSignerAddresses, got)
+	})
+
+	t.Run("defaults are copied", func(t *testing.T) {
+		t.Setenv(stork.StorkPubKeyEnv, "")
+		got, err := stork.SignerAddressesFromEnv()
+		require.NoError(t, err)
+
+		got[0] = common.HexToAddress("0x0000000000000000000000000000000000000001")
+		require.NotEqual(t, got[0], stork.DefaultSignerAddresses[0])
 	})
 
 	t.Run("whitespace only uses defaults", func(t *testing.T) {

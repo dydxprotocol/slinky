@@ -20,7 +20,8 @@ const (
 )
 
 // DefaultSignerAddresses are the trusted Stork aggregator signer addresses
-// used when StorkPubKeyEnv is not set.
+// used when StorkPubKeyEnv is not set. Deployments should set the variable
+// explicitly rather than rely on these.
 var DefaultSignerAddresses = []common.Address{
 	common.HexToAddress("0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44"),
 	common.HexToAddress("0x0bb53E0d5E89778DCD13C2720667D292368dD053"),
@@ -119,7 +120,8 @@ type PublisherSignedPrice struct {
 func SignerAddressesFromEnv() ([]common.Address, error) {
 	raw := strings.TrimSpace(os.Getenv(StorkPubKeyEnv))
 	if raw == "" {
-		return DefaultSignerAddresses, nil
+		// Copy so that callers cannot mutate the package-level defaults through the handler.
+		return append([]common.Address(nil), DefaultSignerAddresses...), nil
 	}
 
 	addrs, err := ParseSignerAddresses(raw)
@@ -201,5 +203,11 @@ func VerifyStorkSignature(sp SignedPrice, signers []common.Address) error {
 		}
 	}
 
-	return fmt.Errorf("signature mismatch: recovered %s is not a trusted signer", recoveredAddr.Hex())
+	trusted := make([]string, len(signers))
+	for i, signer := range signers {
+		trusted[i] = signer.Hex()
+	}
+
+	return fmt.Errorf("signature mismatch: recovered %s, trusted signers %s",
+		recoveredAddr.Hex(), strings.Join(trusted, ","))
 }
