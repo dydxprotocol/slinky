@@ -3,6 +3,7 @@ package stork
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -13,9 +14,17 @@ import (
 
 const (
 	// StorkPubKeyEnv is the environment variable holding the trusted Stork
-	// aggregator public key (Ethereum address) used for signature verification.
+	// aggregator signer addresses (Ethereum addresses) used for signature
+	// verification, as a comma-separated list.
 	StorkPubKeyEnv = "STORK_PUB_KEY"
 )
+
+// DefaultSignerAddresses are the trusted Stork aggregator signer addresses
+// used when StorkPubKeyEnv is not set.
+var DefaultSignerAddresses = []common.Address{
+	common.HexToAddress("0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44"),
+	common.HexToAddress("0x0bb53E0d5E89778DCD13C2720667D292368dD053"),
+}
 
 const (
 	// Name is the name of the Stork provider.
@@ -105,13 +114,44 @@ type PublisherSignedPrice struct {
 	TimestampedSignature TimestampedSignature `json:"timestamped_signature"`
 }
 
+// SignerAddressesFromEnv returns the trusted signer addresses configured in
+// StorkPubKeyEnv, falling back to DefaultSignerAddresses when it is unset.
+func SignerAddressesFromEnv() ([]common.Address, error) {
+	raw := strings.TrimSpace(os.Getenv(StorkPubKeyEnv))
+	if raw == "" {
+		return DefaultSignerAddresses, nil
+	}
+
+	addrs, err := ParseSignerAddresses(raw)
+	if err != nil {
+		return nil, fmt.Errorf("invalid %s value: %w", StorkPubKeyEnv, err)
+	}
+
+	return addrs, nil
+}
+
+// ParseSignerAddresses parses a comma-separated list of hex-encoded Ethereum
+// addresses. Every entry must be a valid address; blank entries are rejected
+// so that a malformed list fails loudly instead of silently shrinking.
+func ParseSignerAddresses(raw string) ([]common.Address, error) {
+	parts := strings.Split(raw, ",")
+	addrs := make([]common.Address, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if !common.IsHexAddress(part) {
+			return nil, fmt.Errorf("invalid signer address %q", part)
+		}
+		addrs = append(addrs, common.HexToAddress(part))
+	}
+
+	return addrs, nil
+}
+
 // VerifyStorkSignature recovers the signer address from the aggregator's
-// ECDSA signature and checks it against the trusted public key from the
-// STORK_PUB_KEY environment variable.
-func VerifyStorkSignature(sp SignedPrice) error {
-	expectedHex := os.Getenv(StorkPubKeyEnv)
-	if expectedHex == "" {
-		expectedHex = "0x0a803F9b1CCe32e2773e0d2e98b37E0775cA5d44"
+// ECDSA signature and checks that it is one of the trusted signer addresses.
+func VerifyStorkSignature(sp SignedPrice, signers []common.Address) error {
+	if len(signers) == 0 {
+		return fmt.Errorf("no trusted signer addresses configured")
 	}
 
 	msgHash := common.FromHex(sp.TimestampedSignature.MsgHash)
@@ -155,12 +195,11 @@ func VerifyStorkSignature(sp SignedPrice) error {
 	}
 
 	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
-	expectedAddr := common.HexToAddress(expectedHex)
-
-	if recoveredAddr != expectedAddr {
-		return fmt.Errorf("signature mismatch: recovered %s, expected %s",
-			recoveredAddr.Hex(), expectedAddr.Hex())
+	for _, signer := range signers {
+		if recoveredAddr == signer {
+			return nil
+		}
 	}
 
-	return nil
+	return fmt.Errorf("signature mismatch: recovered %s is not a trusted signer", recoveredAddr.Hex())
 }
