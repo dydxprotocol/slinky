@@ -563,14 +563,16 @@ func TestWebSocketProvider(t *testing.T) {
 				resolved := map[slinkytypes.CurrencyPair]providertypes.ResolvedResult[*big.Int]{
 					pairs[0]: {
 						Value:     big.NewInt(100),
-						Timestamp: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+						Timestamp: time.Now().Add(time.Minute),
 					},
 				}
 
+				// The unchanged result must carry a later timestamp than the
+				// initial one so the provider refreshes the stored entry.
 				unchangedResolved := map[slinkytypes.CurrencyPair]providertypes.ResolvedResult[*big.Int]{
 					pairs[0]: {
 						Value:        big.NewInt(100),
-						Timestamp:    time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+						Timestamp:    time.Now().Add(time.Hour),
 						ResponseCode: providertypes.ResponseCodeUnchanged,
 					},
 				}

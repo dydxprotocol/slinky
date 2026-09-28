@@ -551,8 +551,23 @@ func TestVerifyAndExtractFeed(t *testing.T) {
 		require.Contains(t, err.Error(), "ed25519 signature verification failed")
 	})
 
-	t.Run("env var not set", func(t *testing.T) {
+	t.Run("env var not set uses default key", func(t *testing.T) {
 		t.Setenv(pyth.PythPubKeyEnv, "")
+
+		// A payload signed by a fresh key must be rejected against the default
+		// key rather than fail on configuration.
+		_, priv, err := ed25519.GenerateKey(nil)
+		require.NoError(t, err)
+		payload := buildSolanaPayload(t, priv, buildInnerPayload(2694, 9726473, -8))
+
+		_, err = pyth.VerifyAndExtractFeed(payload, 2694)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "public key mismatch")
+		require.Contains(t, err.Error(), "expected 9gKEEcFzSd1PDYBKWAKZi4Sq4ZCUaVX5oTr8kEjdwsfR")
+	})
+
+	t.Run("invalid env var value", func(t *testing.T) {
+		t.Setenv(pyth.PythPubKeyEnv, "not-a-base58-key!")
 		_, err := pyth.VerifyAndExtractFeed("dGVzdA==", 2694)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "PYTH_PUB_KEY")

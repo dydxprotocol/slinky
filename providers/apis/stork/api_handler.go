@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
+
 	providertypes "github.com/dydxprotocol/slinky/providers/types"
 
 	"github.com/dydxprotocol/slinky/oracle/config"
@@ -19,8 +21,9 @@ var _ types.PriceAPIDataHandler = (*APIHandler)(nil)
 
 // APIHandler implements the PriceAPIDataHandler interface for Stork.
 type APIHandler struct {
-	api   config.APIConfig
-	cache types.ProviderTickers
+	api     config.APIConfig
+	cache   types.ProviderTickers
+	signers []common.Address
 }
 
 // NewAPIHandler returns a new Stork PriceAPIDataHandler.
@@ -39,9 +42,15 @@ func NewAPIHandler(
 		return nil, fmt.Errorf("invalid api config for %s: %w", Name, err)
 	}
 
+	signers, err := SignerAddressesFromEnv()
+	if err != nil {
+		return nil, fmt.Errorf("invalid signer config for %s: %w", Name, err)
+	}
+
 	return &APIHandler{
-		api:   api,
-		cache: types.NewProviderTickers(),
+		api:     api,
+		cache:   types.NewProviderTickers(),
+		signers: signers,
 	}, nil
 }
 
@@ -120,7 +129,7 @@ func (h *APIHandler) ParseResponse(
 			continue
 		}
 
-		if err := VerifyStorkSignature(item.StorkSignatureVerification.StorkSignedPrice); err != nil {
+		if err := VerifyStorkSignature(item.StorkSignatureVerification.StorkSignedPrice, h.signers); err != nil {
 			unresolved[ticker] = providertypes.UnresolvedResult{
 				ErrorWithCode: providertypes.NewErrorWithCode(
 					fmt.Errorf("stork signature verification failed for %s: %w", item.Market, err),
